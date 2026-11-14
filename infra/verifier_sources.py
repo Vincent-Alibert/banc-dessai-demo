@@ -133,7 +133,7 @@ def verifier(racine=RACINE):
         yaml_statut = "réussi : syntaxe YAML, sources/migrations, montages, volumes et ports"
         if importlib.util.find_spec("jinja2"):
             from jinja2 import Environment, StrictUndefined
-            env = Environment(undefined=StrictUndefined)
+            env = Environment(undefined=StrictUndefined)  # nosec B701 # rendu du SQL des modeles dbt, jamais de HTML
             macros = env.from_string((racine / "dbt/macros/campagnes.sql").read_text()).module
             contexte = {"ref": lambda n: ("banc_staging." if n.startswith("stg_") or n in seeds else "banc.") + n,
                         "source": lambda a, b: tables[(a, b)], "campagne_de_test": macros.campagne_de_test}
