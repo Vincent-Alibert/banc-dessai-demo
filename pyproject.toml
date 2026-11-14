@@ -60,6 +60,7 @@ source = ["banc", "entrepot", "infra"]
 
 [tool.ruff]
 target-version = "py312"
+line-length = 120                # longueur des lignes du depot (ruff format)
 
 [tool.ruff.lint]
 # Regles choisies explicitement : le jeu par defaut de ruff change d'une version a l'autre.
