@@ -1,4 +1,5 @@
 """Contrôles statiques reproductibles ; ils ne remplacent pas une exécution Docker/Postgres/dbt."""
+
 from __future__ import annotations
 
 import ast
@@ -10,13 +11,24 @@ import re
 import sys
 
 RACINE = Path(__file__).resolve().parents[1]
-INTERDITS = {"openai", "google.genai", "banc.dialogues.client_noa", "banc.dialogues.comptes",
-             "banc.personas.moteur_persona", "banc.base", "banc.juges.appels_api"}
+INTERDITS = {
+    "openai",
+    "google.genai",
+    "banc.dialogues.client_noa",
+    "banc.dialogues.comptes",
+    "banc.personas.moteur_persona",
+    "banc.base",
+    "banc.juges.appels_api",
+}
 
 
 def fichiers_code(racine):
-    return sorted(p for p in racine.rglob("*") if p.is_file()
-                  and not any(x in {"__pycache__", ".travail", "runs", "target", "logs"} for x in p.relative_to(racine).parts))
+    return sorted(
+        p
+        for p in racine.rglob("*")
+        if p.is_file()
+        and not any(x in {"__pycache__", ".travail", "runs", "target", "logs"} for x in p.relative_to(racine).parts)
+    )
 
 
 def verifier(racine=RACINE):
@@ -32,8 +44,13 @@ def verifier(racine=RACINE):
             erreurs.append(str(p.relative_to(racine)) + " : " + str(exc))
             continue
         for n in ast.walk(arbre):
-            modules = ([n.module] if isinstance(n, ast.ImportFrom) else [a.name for a in n.names]
-                       if isinstance(n, ast.Import) else [])
+            modules = (
+                [n.module]
+                if isinstance(n, ast.ImportFrom)
+                else [a.name for a in n.names]
+                if isinstance(n, ast.Import)
+                else []
+            )
             for module in modules:
                 if not module or module == "__future__":
                     continue
@@ -57,8 +74,10 @@ def verifier(racine=RACINE):
             if ref not in modeles and ref not in seeds:
                 erreurs.append(f"référence dbt absente : {p.relative_to(racine)} → {ref}")
         sources += re.findall(r"source\(['\"]([^'\"]+)['\"],\s*['\"]([^'\"]+)['\"]\)", texte)
-    graphe = {nom: set(re.findall(r"\bref\(['\"]([^'\"]+)['\"]\)", p.read_text())) & set(modeles)
-              for nom, p in modeles.items()}
+    graphe = {
+        nom: set(re.findall(r"\bref\(['\"]([^'\"]+)['\"]\)", p.read_text())) & set(modeles)
+        for nom, p in modeles.items()
+    }
     reste = dict(graphe)
     while reste:
         libres = {n for n, deps in reste.items() if not deps.intersection(reste)}
@@ -77,8 +96,11 @@ def verifier(racine=RACINE):
         p = racine / "demo/C01" / nom
         if not p.is_file() or hashlib.sha256(p.read_bytes()).hexdigest() != sha:
             erreurs.append("empreinte synthétique invalide : " + nom)
-    motifs = [re.compile(r"\bsk-(?:proj-)?[A-Za-z0-9_-]{20,}"), re.compile(r"\bnvapi-[A-Za-z0-9_-]{20,}"),
-              re.compile(r"-----BEGIN (?:RSA |EC |OPENSSH )?PRIVATE KEY-----")]
+    motifs = [
+        re.compile(r"\bsk-(?:proj-)?[A-Za-z0-9_-]{20,}"),
+        re.compile(r"\bnvapi-[A-Za-z0-9_-]{20,}"),
+        re.compile(r"-----BEGIN (?:RSA |EC |OPENSSH )?PRIVATE KEY-----"),
+    ]
     for p in fichiers:
         if p.suffix not in {".py", ".json", ".md", ".yml", ".sql", ".txt", ".csv", ".sh", ".ps1"}:
             continue
@@ -90,6 +112,7 @@ def verifier(racine=RACINE):
     services = []
     if importlib.util.find_spec("yaml"):
         import yaml
+
         for p in [*(racine / "dbt").rglob("*.yml"), racine / "docker-compose.yml"]:
             yaml.safe_load(p.read_text(encoding="utf-8"))
         compose = yaml.safe_load((racine / "docker-compose.yml").read_text(encoding="utf-8"))
@@ -115,8 +138,9 @@ def verifier(racine=RACINE):
             if v and (v.get("external") or v.get("name")):
                 erreurs.append("volume partagé ou nommé hors projet")
         declaration = yaml.safe_load((racine / "dbt/models/sources.yml").read_text())
-        tables = {(s["name"], t["name"]): s["schema"] + "." + t["name"]
-                  for s in declaration["sources"] for t in s["tables"]}
+        tables = {
+            (s["name"], t["name"]): s["schema"] + "." + t["name"] for s in declaration["sources"] for t in s["tables"]
+        }
         for source in sources:
             if source not in tables:
                 erreurs.append("source dbt non déclarée : " + str(source))
@@ -132,18 +156,30 @@ def verifier(racine=RACINE):
         yaml_statut = "réussi : syntaxe YAML, sources/migrations, montages, volumes et ports"
         if importlib.util.find_spec("jinja2"):
             from jinja2 import Environment, StrictUndefined
+
             env = Environment(undefined=StrictUndefined)  # nosec B701 # rendu du SQL des modeles dbt, jamais de HTML
             macros = env.from_string((racine / "dbt/macros/campagnes.sql").read_text()).module
-            contexte = {"ref": lambda n: ("banc_staging." if n.startswith("stg_") or n in seeds else "banc.") + n,
-                        "source": lambda a, b: tables[(a, b)], "campagne_de_test": macros.campagne_de_test}
+            contexte = {
+                "ref": lambda n: ("banc_staging." if n.startswith("stg_") or n in seeds else "banc.") + n,
+                "source": lambda a, b: tables[(a, b)],
+                "campagne_de_test": macros.campagne_de_test,
+            }
             for p in [*(racine / "dbt/models").rglob("*.sql"), *(racine / "dbt/tests").glob("*.sql")]:
                 rendu = env.from_string(p.read_text()).render(**contexte)
                 if "{{" in rendu or "{%" in rendu:
                     erreurs.append("Jinja non résolu : " + p.name)
             jinja_statut = "réussi : rendu Jinja des modèles/tests ; pas de compilation SQL Postgres"
-    return {"python_compiles": len(python), "modeles_dbt": len(modeles), "tests_sql_dbt": len(list((racine / "dbt/tests").glob("*.sql"))),
-            "references_dbt": len(references), "jeux_synthetiques": len(empreintes), "services": services,
-            "yaml": yaml_statut, "jinja": jinja_statut, "erreurs": erreurs}
+    return {
+        "python_compiles": len(python),
+        "modeles_dbt": len(modeles),
+        "tests_sql_dbt": len(list((racine / "dbt/tests").glob("*.sql"))),
+        "references_dbt": len(references),
+        "jeux_synthetiques": len(empreintes),
+        "services": services,
+        "yaml": yaml_statut,
+        "jinja": jinja_statut,
+        "erreurs": erreurs,
+    }
 
 
 if __name__ == "__main__":

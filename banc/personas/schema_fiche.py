@@ -1,6 +1,7 @@
 """Schéma des fiches synthétiques : champs et énumérations repris du schéma source.
 Validation stricte avec la bibliothèque standard, sans moteur de génération ni dépendance LLM.
 """
+
 from __future__ import annotations
 
 import json
@@ -14,8 +15,9 @@ class Donnees:
         return asdict(self)
 
     def model_dump_json(self, *, indent=None, exclude_none=False):
-        return json.dumps(self.model_dump(), ensure_ascii=False, indent=indent,
-                          separators=None if indent else (",", ":"))
+        return json.dumps(
+            self.model_dump(), ensure_ascii=False, indent=indent, separators=None if indent else (",", ":")
+        )
 
     @classmethod
     def model_validate_json(cls, texte):
@@ -195,7 +197,7 @@ class Meta(Donnees):
 
 @dataclass(kw_only=True)
 class FichePersona(Donnees):
-    version_schema: str = '1.0'
+    version_schema: str = "1.0"
     mineur: bool
     identite: Identite
     histoire: str
@@ -211,10 +213,9 @@ class FichePersona(Donnees):
             raise ValueError("persona mineur : interdit dans ce jeu de simulation")
 
 
-
 @dataclass(kw_only=True)
 class VecteurAxes(Donnees):
-    version_axes: str = '1.0'
+    version_axes: str = "1.0"
     position: Position
     motif_entree: MotifEntree
     resistance: Resistance

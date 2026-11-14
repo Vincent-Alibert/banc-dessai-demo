@@ -9,6 +9,7 @@ s'arrete (une migration appliquee ne se modifie pas : on en ecrit une nouvelle).
 Usage :  python entrepot/migrer.py            applique ce qui manque
          python entrepot/migrer.py --verifier  n'applique rien, sort en erreur s'il manque quelque chose
 """
+
 from __future__ import annotations
 
 import hashlib
@@ -72,9 +73,11 @@ def verifier() -> None:
     if modifiees:
         raise SystemExit(f"[X] migration(s) modifiee(s) apres application : {', '.join(modifiees)}")
     if manquantes:
-        raise SystemExit("[X] migration(s) non appliquee(s) : "
-                         + ", ".join(f.name for _, f, _ in manquantes)
-                         + "\n    Lancer : python entrepot/migrer.py")
+        raise SystemExit(
+            "[X] migration(s) non appliquee(s) : "
+            + ", ".join(f.name for _, f, _ in manquantes)
+            + "\n    Lancer : python entrepot/migrer.py"
+        )
 
 
 def main() -> int:
@@ -90,10 +93,12 @@ def main() -> int:
         print("[ok] aucune migration a appliquer")
         return 0
     for version, f, empreinte in manquantes:
-        with connecter() as cnx:          # une transaction par migration
+        with connecter() as cnx:  # une transaction par migration
             cnx.execute(f.read_text(encoding="utf-8"))
-            cnx.execute("INSERT INTO banc_meta.migrations_appliquees (version, fichier, empreinte) "
-                        "VALUES (%s, %s, %s)", (version, f.name, empreinte))
+            cnx.execute(
+                "INSERT INTO banc_meta.migrations_appliquees (version, fichier, empreinte) VALUES (%s, %s, %s)",
+                (version, f.name, empreinte),
+            )
         print(f"[ok] {f.name} ({empreinte})")
     return 0
 

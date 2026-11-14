@@ -1,4 +1,5 @@
 """Recette des clients locaux et du rendu : faux serveur Metabase de test, pas un Metabase réel."""
+
 from __future__ import annotations
 
 from contextlib import redirect_stdout
@@ -24,8 +25,16 @@ class ServeurMetabaseFactice(ThreadingHTTPServer):
     daemon_threads = True
 
     def __init__(self):
-        self.etat = {"initialise": False, "bases": [], "collections": [], "cartes": {}, "tableaux": {},
-                     "core_vide": False, "incidents_vides": False, "appels": []}
+        self.etat = {
+            "initialise": False,
+            "bases": [],
+            "collections": [],
+            "cartes": {},
+            "tableaux": {},
+            "core_vide": False,
+            "incidents_vides": False,
+            "appels": [],
+        }
         super().__init__(("127.0.0.1", 0), Requete)
 
 
@@ -85,8 +94,13 @@ class Requete(BaseHTTPRequestHandler):
             if chemin.endswith("/query"):
                 nom = etat["cartes"][ident]["name"]
                 vide = etat["core_vide"] or (etat["incidents_vides"] and "incidents" in nom)
-                return self.repondre({"status": "completed", "row_count": 0 if vide else 2,
-                                      "data": {"rows": [] if vide else [["synthétique"], ["synthétique"]]}})
+                return self.repondre(
+                    {
+                        "status": "completed",
+                        "row_count": 0 if vide else 2,
+                        "data": {"rows": [] if vide else [["synthétique"], ["synthétique"]]},
+                    }
+                )
             etat["cartes"][ident] = corps
             return self.repondre({"id": ident})
         if chemin == "/api/dashboard":
@@ -110,9 +124,11 @@ class MetabaseLocal(unittest.TestCase):
         self.serveur = ServeurMetabaseFactice()
         self.fil = threading.Thread(target=self.serveur.serve_forever, daemon=True)
         self.fil.start()
-        self.patches = [mock.patch.object(meta, "URL", f"http://127.0.0.1:{self.serveur.server_port}"),
-                        mock.patch.object(chemins, "RUNS", Path(self.travail.name)),
-                        mock.patch.dict(os.environ, {}, clear=True)]
+        self.patches = [
+            mock.patch.object(meta, "URL", f"http://127.0.0.1:{self.serveur.server_port}"),
+            mock.patch.object(chemins, "RUNS", Path(self.travail.name)),
+            mock.patch.dict(os.environ, {}, clear=True),
+        ]
         for p in self.patches:
             p.start()
         self.addCleanup(self.nettoyer)
@@ -171,8 +187,11 @@ class EntrepotEtRapport(unittest.TestCase):
     def test_dsn_ne_lit_pas_env_et_refuse_cible_non_locale(self):
         with mock.patch.dict(os.environ, {}, clear=True):
             self.assertIn("127.0.0.1", connexion.dsn())
-        for url in ("postgresql://banc:x@production.invalid/banc", "postgresql://banc:x@localhost/autre",
-                    "postgresql://banc:x@localhost/banc?host=production.invalid"):
+        for url in (
+            "postgresql://banc:x@production.invalid/banc",
+            "postgresql://banc:x@localhost/autre",
+            "postgresql://banc:x@localhost/banc?host=production.invalid",
+        ):
             with mock.patch.dict(os.environ, {"BANC_DB_URL": url}), self.assertRaises(SystemExit):
                 connexion.dsn()
 

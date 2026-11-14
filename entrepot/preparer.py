@@ -1,4 +1,5 @@
 """Précontrôles de la chaîne : mode, jeu synthétique, fiches, migrations et dbt local."""
+
 from __future__ import annotations
 
 import argparse

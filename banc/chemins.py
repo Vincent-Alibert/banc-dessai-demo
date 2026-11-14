@@ -1,4 +1,5 @@
 """Emplacements locaux du dossier de simulation, sans lecture de fichier d'environnement."""
+
 from pathlib import Path
 
 RACINE = Path(__file__).resolve().parents[1]

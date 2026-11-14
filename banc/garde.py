@@ -1,4 +1,5 @@
 """Contrat commun : ce dossier ne sait exécuter que des simulations locales."""
+
 from __future__ import annotations
 
 import math
@@ -18,8 +19,11 @@ def exiger_simulation(mode: str = "simulation") -> None:
     for i, argument in enumerate(sys.argv[1:], start=1):
         if argument == "--mode":
             modes_cli.append(sys.argv[i + 1] if i + 1 < len(sys.argv) else "")
-    if (mode != "simulation" or os.environ.get("BANC_MODE", "simulation") != "simulation"
-            or any(m != "simulation" for m in modes_cli)):
+    if (
+        mode != "simulation"
+        or os.environ.get("BANC_MODE", "simulation") != "simulation"
+        or any(m != "simulation" for m in modes_cli)
+    ):
         raise SystemExit("[X] mode non supporté : simulation uniquement ; aucun appel réel n'est disponible")
 
 
@@ -52,6 +56,7 @@ def personas_valides(texte: str) -> list[str]:
 
 if __name__ == "__main__":
     import argparse
+
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--mode", default="simulation")
     parser.add_argument("--campagne", required=True, type=campagne_valide)

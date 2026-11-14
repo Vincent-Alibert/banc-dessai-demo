@@ -1,4 +1,5 @@
 """Recette post-DAG : données Postgres, tests dbt, rapport et requêtes Metabase réellement accessibles."""
+
 from __future__ import annotations
 
 import argparse
@@ -27,7 +28,8 @@ def verifier(campagne):
     notes = len(correspondance) * 2 * 7
     cout_simule = round(sum(r["cout"]["simule_usd"] for r in runs), 6)
     with connecter() as cnx:
-        lu = cnx.execute("""
+        lu = cnx.execute(
+            """
             SELECT
               (SELECT count(*) FROM banc.dim_run WHERE campagne_id = %s),
               (SELECT count(*) FROM banc.fait_tour t JOIN banc.dim_run r USING (run_id) WHERE r.campagne_id = %s),
@@ -36,7 +38,9 @@ def verifier(campagne):
               (SELECT count(*) FROM banc.fait_accord WHERE campagne_id = %s AND mesure IN ('alpha_ordinal','kappa_quadratique')),
               (SELECT cout_simule_usd FROM banc.v_couts_simules WHERE campagne_id = %s),
               (SELECT count(*) FROM banc.dim_run WHERE campagne_id = %s AND mode_execution IS DISTINCT FROM 'simulation')
-        """, (campagne,) * 7).fetchone()
+        """,
+            (campagne,) * 7,
+        ).fetchone()
     if tuple(lu[:3]) != (len(runs), tours, notes) or lu[3] != 0 or lu[4] <= 0 or lu[6] != 0:
         raise ValueError("comptages, dépenses nulles, accord ou mode de l'entrepôt incohérents")
     if not math.isclose(float(lu[5]), cout_simule, abs_tol=0.000001):
@@ -51,6 +55,7 @@ def verifier(campagne):
     if meta.get("mode") != "simulation" or meta.get("campagne") != campagne or len(meta.get("questions", [])) != 6:
         raise ValueError("tableau de simulation Metabase incomplet")
     from infra.metabase_configurer import appel, session
+
     jeton = session()
     for q in meta["questions"]:
         resultat = appel("POST", f"/api/card/{int(q['id'])}/query", {}, session=jeton)
@@ -61,9 +66,18 @@ def verifier(campagne):
             effectif = len((resultat.get("data") or {}).get("rows") or [])
         if effectif <= 0 and not q.get("vide_autorise"):
             raise ValueError("question Metabase centrale vide")
-    bilan = {"campagne": campagne, "mode": "simulation", "runs": len(runs), "tours": tours, "notes_axes": notes,
-             "depenses_usd": 0, "cout_simule_usd": cout_simule, "tests_dbt": "réussis",
-             "questions_metabase_accessibles": len(meta["questions"]), "dashboard_path": meta["dashboard_path"]}
+    bilan = {
+        "campagne": campagne,
+        "mode": "simulation",
+        "runs": len(runs),
+        "tours": tours,
+        "notes_axes": notes,
+        "depenses_usd": 0,
+        "cout_simule_usd": cout_simule,
+        "tests_dbt": "réussis",
+        "questions_metabase_accessibles": len(meta["questions"]),
+        "dashboard_path": meta["dashboard_path"],
+    }
     (dossier / "verification.json").write_text(json.dumps(bilan, ensure_ascii=False, indent=2), encoding="utf-8")
     print("[ok] recette complète de cette exécution : " + json.dumps(bilan, ensure_ascii=False))
     return bilan

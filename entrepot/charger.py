@@ -1,6 +1,7 @@
 """Charge les seuls fichiers d'une campagne simulée, puis dbt build et dbt docs generate.
 Les dépenses et les jetons nouveaux sont obligatoirement nuls ; le budget simulé reste distinct.
 """
+
 from __future__ import annotations
 
 import hashlib
@@ -24,14 +25,18 @@ def executable_dbt() -> str:
     """dbt epingle : DBT_BIN, sinon l'environnement de l'image Airflow, sinon .venv-dbt du depot."""
     import os
     import shutil
-    for candidat in (os.environ.get("DBT_BIN"), "/opt/dbt-venv/bin/dbt",
-                     str(RACINE / ".venv-dbt" / "Scripts" / "dbt.exe"), str(RACINE / ".venv-dbt" / "bin" / "dbt")):
+
+    for candidat in (
+        os.environ.get("DBT_BIN"),
+        "/opt/dbt-venv/bin/dbt",
+        str(RACINE / ".venv-dbt" / "Scripts" / "dbt.exe"),
+        str(RACINE / ".venv-dbt" / "bin" / "dbt"),
+    ):
         if candidat and Path(candidat).exists():
             return candidat
     trouve = shutil.which("dbt")
     if not trouve:
-        raise SystemExit("[X] dbt introuvable : python -m venv .venv-dbt puis "
-                         "utiliser la pile Docker fournie")
+        raise SystemExit("[X] dbt introuvable : python -m venv .venv-dbt puis utiliser la pile Docker fournie")
     return trouve
 
 
@@ -41,16 +46,28 @@ def dbt(*commande: str) -> None:
     import subprocess
     from urllib.parse import unquote, urlparse
     from entrepot.connexion import dsn
+
     u = urlparse(dsn())
-    env = {**os.environ, "BANC_DBT_HOTE": u.hostname or "127.0.0.1", "BANC_DBT_PORT": str(u.port or 5432),
-           "BANC_DBT_UTILISATEUR": unquote(u.username or "banc"), "BANC_DBT_MOT_DE_PASSE": unquote(u.password or ""),
-           "BANC_DBT_BASE": (u.path or "/banc").lstrip("/"), "DBT_SEND_ANONYMOUS_USAGE_STATS": "false"}
+    env = {
+        **os.environ,
+        "BANC_DBT_HOTE": u.hostname or "127.0.0.1",
+        "BANC_DBT_PORT": str(u.port or 5432),
+        "BANC_DBT_UTILISATEUR": unquote(u.username or "banc"),
+        "BANC_DBT_MOT_DE_PASSE": unquote(u.password or ""),
+        "BANC_DBT_BASE": (u.path or "/banc").lstrip("/"),
+        "DBT_SEND_ANONYMOUS_USAGE_STATS": "false",
+    }
     print(f"dbt {' '.join(commande)}")
-    fin = subprocess.run([executable_dbt(), *commande, "--project-dir", str(DOSSIER_DBT),
-                          "--profiles-dir", str(DOSSIER_DBT)], env=env, cwd=DOSSIER_DBT)
+    fin = subprocess.run(
+        [executable_dbt(), *commande, "--project-dir", str(DOSSIER_DBT), "--profiles-dir", str(DOSSIER_DBT)],
+        env=env,
+        cwd=DOSSIER_DBT,
+    )
     if fin.returncode != 0:
-        raise SystemExit(f"[X] dbt {' '.join(commande)} a echoue (code {fin.returncode}) : etoile non validee, "
-                         "chaine arretee avant le calcul d'accord")
+        raise SystemExit(
+            f"[X] dbt {' '.join(commande)} a echoue (code {fin.returncode}) : etoile non validee, "
+            "chaine arretee avant le calcul d'accord"
+        )
 
 
 RUNS = chemins.RUNS
@@ -64,11 +81,13 @@ def empreinte(octets: bytes) -> str:
 def upsert(cnx, table: str, cle: str, valeurs: dict) -> bool:
     """Insere ou met a jour si l'empreinte a change. Renvoie True si quelque chose a ete ecrit."""
     colonnes = list(valeurs)
-    sql = (f"INSERT INTO {table} ({', '.join(colonnes)}) VALUES ({', '.join(['%s'] * len(colonnes))}) "
-           f"ON CONFLICT ({cle}) DO UPDATE SET "
-           + ", ".join(f"{c} = EXCLUDED.{c}" for c in colonnes if c != cle)
-           + ", charge_le = now() "
-           + (f"WHERE {table}.empreinte IS DISTINCT FROM EXCLUDED.empreinte" if "empreinte" in colonnes else ""))
+    sql = (
+        f"INSERT INTO {table} ({', '.join(colonnes)}) VALUES ({', '.join(['%s'] * len(colonnes))}) "
+        f"ON CONFLICT ({cle}) DO UPDATE SET "
+        + ", ".join(f"{c} = EXCLUDED.{c}" for c in colonnes if c != cle)
+        + ", charge_le = now() "
+        + (f"WHERE {table}.empreinte IS DISTINCT FROM EXCLUDED.empreinte" if "empreinte" in colonnes else "")
+    )
     return cnx.execute(sql, list(valeurs.values())).rowcount > 0
 
 
@@ -83,9 +102,15 @@ def lire_grille(fichier: Path) -> tuple[str, list[dict]]:
     for m in re.finditer(r"^(B[0-6]) ([^.]+)\. (.+)$", texte, re.M):
         # « sans objet » possible : B6 dans toutes les grilles ; depuis la v1.3, tout axe dont la
         # definition prevoit le null (B4 et B5, dialogue de moins de 3 tours)
-        axes.append({"axe_id": m.group(1), "libelle": m.group(2).strip(), "definition": m.group(3).strip(),
-                     "sans_objet_possible": m.group(1) == "B6" or "(null)" in m.group(3)})
-    attendus = 7 if version != "1.0" else 6   # B0 ajoute en v1.1
+        axes.append(
+            {
+                "axe_id": m.group(1),
+                "libelle": m.group(2).strip(),
+                "definition": m.group(3).strip(),
+                "sans_objet_possible": m.group(1) == "B6" or "(null)" in m.group(3),
+            }
+        )
+    attendus = 7 if version != "1.0" else 6  # B0 ajoute en v1.1
     if len(axes) != attendus:
         raise SystemExit(f"[X] grille : {len(axes)} axes lus dans {fichier.name}, {attendus} attendus")
     return f"B-v{version}", axes
@@ -108,6 +133,7 @@ def valider_run(run: dict, campagne: str) -> None:
 def main() -> int:
     global SEULE
     import argparse
+
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--campagne", required=True, type=campagne_valide)
     args = parser.parse_args()
@@ -127,15 +153,24 @@ def main() -> int:
             valider_run(run, SEULE)
             nom = f"{SEULE}/{f.name}"
             presents.append(nom)
-            compte["run"] += upsert(cnx, "banc_brut.run", "fichier", {
-                "fichier": nom, "campagne": SEULE, "empreinte": empreinte(octets), "contenu": json.dumps(run)})
+            compte["run"] += upsert(
+                cnx,
+                "banc_brut.run",
+                "fichier",
+                {"fichier": nom, "campagne": SEULE, "empreinte": empreinte(octets), "contenu": json.dumps(run)},
+            )
         cnx.execute("DELETE FROM banc_brut.run WHERE campagne = %s AND NOT fichier = ANY(%s)", (SEULE, presents))
         from banc.personas.fiche_banc import lire
+
         for f in sorted(chemins.PERSONAS.glob("*.json")):
             lire(f)
             octets = f.read_bytes()
-            compte["fiche_persona"] += upsert(cnx, "banc_brut.fiche_persona", "fichier", {
-                "fichier": f.name, "empreinte": empreinte(octets), "contenu": json.dumps(json.loads(octets))})
+            compte["fiche_persona"] += upsert(
+                cnx,
+                "banc_brut.fiche_persona",
+                "fichier",
+                {"fichier": f.name, "empreinte": empreinte(octets), "contenu": json.dumps(json.loads(octets))},
+            )
         presents = []
         for f in sorted(dossier.glob("juges/*/*.json")):
             octets = f.read_bytes()
@@ -147,38 +182,69 @@ def main() -> int:
                 raise ValueError("un juge factice ne facture aucun jeton ni essai")
             nom = f"{SEULE}/juges/{juge}/{f.name}"
             presents.append(nom)
-            compte["appel_juge"] += upsert(cnx, "banc_brut.appel_juge", "fichier", {
-                "fichier": nom, "campagne": SEULE, "juge": juge, "empreinte": empreinte(octets),
-                "contenu": json.dumps(note)})
+            compte["appel_juge"] += upsert(
+                cnx,
+                "banc_brut.appel_juge",
+                "fichier",
+                {
+                    "fichier": nom,
+                    "campagne": SEULE,
+                    "juge": juge,
+                    "empreinte": empreinte(octets),
+                    "contenu": json.dumps(note),
+                },
+            )
         cnx.execute("DELETE FROM banc_brut.appel_juge WHERE campagne = %s AND NOT fichier = ANY(%s)", (SEULE, presents))
         corr = dossier / "notation" / "correspondance.json"
         if not corr.exists():
             raise ValueError("correspondance de notation absente")
         octets = corr.read_bytes()
-        upsert(cnx, "banc_brut.correspondance_notation", "campagne", {
-            "campagne": SEULE, "empreinte": empreinte(octets), "contenu": json.dumps(json.loads(octets))})
+        upsert(
+            cnx,
+            "banc_brut.correspondance_notation",
+            "campagne",
+            {"campagne": SEULE, "empreinte": empreinte(octets), "contenu": json.dumps(json.loads(octets))},
+        )
         controle = dossier / "controles" / "persona.json"
         if not controle.exists():
             raise ValueError("contrôles des personas absents")
         octets = controle.read_bytes()
-        upsert(cnx, "banc_brut.controle_persona", "fichier", {
-            "fichier": f"{SEULE}/controles/persona.json", "campagne": SEULE,
-            "empreinte": empreinte(octets), "contenu": json.dumps(json.loads(octets))})
-        ligne = {"campagne_id": SEULE, "version_fiches": "synthétique C01", "base": "simulation",
-                 "objet": "Vrai lanceur avec doubles enregistrés C01 ; aucun appel externe, aucun jugement réel."}
-        cnx.execute("INSERT INTO banc_brut.campagne (campagne_id, ligne) VALUES (%s, %s) "
-                    "ON CONFLICT (campagne_id) DO UPDATE SET ligne = EXCLUDED.ligne, charge_le = now()",
-                    (SEULE, json.dumps(ligne)))
+        upsert(
+            cnx,
+            "banc_brut.controle_persona",
+            "fichier",
+            {
+                "fichier": f"{SEULE}/controles/persona.json",
+                "campagne": SEULE,
+                "empreinte": empreinte(octets),
+                "contenu": json.dumps(json.loads(octets)),
+            },
+        )
+        ligne = {
+            "campagne_id": SEULE,
+            "version_fiches": "synthétique C01",
+            "base": "simulation",
+            "objet": "Vrai lanceur avec doubles enregistrés C01 ; aucun appel externe, aucun jugement réel.",
+        }
+        cnx.execute(
+            "INSERT INTO banc_brut.campagne (campagne_id, ligne) VALUES (%s, %s) "
+            "ON CONFLICT (campagne_id) DO UPDATE SET ligne = EXCLUDED.ligne, charge_le = now()",
+            (SEULE, json.dumps(ligne)),
+        )
         for version, axes in lire_grilles():
-            cnx.execute("INSERT INTO banc_brut.grille (version_grille, axes) VALUES (%s, %s) "
-                        "ON CONFLICT (version_grille) DO UPDATE SET axes = EXCLUDED.axes, charge_le = now()",
-                        (version, json.dumps(axes)))
+            cnx.execute(
+                "INSERT INTO banc_brut.grille (version_grille, axes) VALUES (%s, %s) "
+                "ON CONFLICT (version_grille) DO UPDATE SET axes = EXCLUDED.axes, charge_le = now()",
+                (version, json.dumps(axes)),
+            )
     print("couche brute : " + ", ".join(f"{k} {v} écrit(s)" for k, v in compte.items()))
     dbt("build")
     dbt("docs", "generate")
     with connecter() as cnx:
-        bilan = cnx.execute("SELECT (SELECT count(*) FROM banc.dim_run), (SELECT count(*) FROM banc.fait_tour), "
-                            "(SELECT count(*) FROM banc.fait_note)").fetchone()
+        bilan = cnx.execute(
+            "SELECT (SELECT count(*) FROM banc.dim_run), (SELECT count(*) FROM banc.fait_tour), "
+            "(SELECT count(*) FROM banc.fait_note)"
+        ).fetchone()
     print("étoile : {} runs · {} tours · {} notes ; tests dbt réussis".format(*bilan))
     return 0
 

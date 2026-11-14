@@ -18,6 +18,7 @@ Reference : K. Krippendorff, « Computing Krippendorff's Alpha-Reliability », 2
 
 Usage : python -m banc.notation.accord --demo   (calcule les deux mesures sur des donnees fictives)
 """
+
 from __future__ import annotations
 
 import sys
@@ -63,8 +64,9 @@ def alpha_krippendorff(donnees: dict, niveau: str = "ordinal") -> float | None:
         return None
     valeurs = sorted(marges)
     d_obs = sum(poids * _distance2(c, k, niveau, marges, valeurs) for (c, k), poids in o.items()) / n
-    d_att = sum(marges[c] * marges[k] * _distance2(c, k, niveau, marges, valeurs)
-                for c in valeurs for k in valeurs) / (n * (n - 1))
+    d_att = sum(marges[c] * marges[k] * _distance2(c, k, niveau, marges, valeurs) for c in valeurs for k in valeurs) / (
+        n * (n - 1)
+    )
     if d_att == 0:
         return None
     return 1 - d_obs / d_att
@@ -83,7 +85,7 @@ def kappa_pondere(a: list, b: list, categories: list, poids: str = "quadratique"
 
     def w(i: int, j: int) -> float:  # poids de DESACCORD, 0 sur la diagonale
         d = abs(i - j) / (q - 1)
-        return d ** 2 if poids == "quadratique" else d
+        return d**2 if poids == "quadratique" else d
 
     n = len(a)
     obs = Counter((idx[x], idx[y]) for x, y in zip(a, b))
@@ -99,6 +101,7 @@ def kappa_pondere(a: list, b: list, categories: list, poids: str = "quadratique"
 def _demo() -> None:
     # Deux juges fictifs sur 6 runs x 5 axes, notes 1 a 4, un desaccord d'un cran par run.
     import random
+
     rnd = random.Random(20261011)
     donnees, a, b = {}, [], []
     for run in range(1, 7):

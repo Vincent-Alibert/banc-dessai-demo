@@ -1,4 +1,5 @@
 """Recette locale du vrai lanceur : aucune clé, aucun client réel, aucun appel externe."""
+
 from __future__ import annotations
 
 from contextlib import redirect_stdout
@@ -35,13 +36,15 @@ class SimulationLocale(unittest.TestCase):
     def setUp(self):
         self.travail = tempfile.TemporaryDirectory(dir=RACINE / "tests")
         self.runs = Path(self.travail.name)
-        self.patches = [mock.patch.dict(os.environ, {}, clear=True),
-                        mock.patch.object(dialoguer, "DOSSIER_RUNS", self.runs),
-                        mock.patch.object(exporter_notation, "RUNS", self.runs),
-                        mock.patch.object(juger, "RUNS", self.runs),
-                        mock.patch.object(controles_persona, "RUNS", self.runs),
-                        mock.patch.object(dialoguer, "LIMITE_ONBOARDING", parallele.LimiteDebit(5, 60)),
-                        mock.patch.object(reponses, "LIMITE_NVIDIA", parallele.LimiteDebit(40, 60))]
+        self.patches = [
+            mock.patch.dict(os.environ, {}, clear=True),
+            mock.patch.object(dialoguer, "DOSSIER_RUNS", self.runs),
+            mock.patch.object(exporter_notation, "RUNS", self.runs),
+            mock.patch.object(juger, "RUNS", self.runs),
+            mock.patch.object(controles_persona, "RUNS", self.runs),
+            mock.patch.object(dialoguer, "LIMITE_ONBOARDING", parallele.LimiteDebit(5, 60)),
+            mock.patch.object(reponses, "LIMITE_NVIDIA", parallele.LimiteDebit(40, 60)),
+        ]
         for p in self.patches:
             p.start()
         self.addCleanup(self.travail.cleanup)
@@ -51,8 +54,23 @@ class SimulationLocale(unittest.TestCase):
         contrats.definir_intervalle_noa(0)
 
     def lancer(self, *options):
-        argv = ["dialoguer", "--campagne", "S01", "--tours", "5", "--bras", "les_deux",
-                "--paralleles", "4", "--echelle-delais", "0", "--plafond-usd", "1", "--reprendre", *options]
+        argv = [
+            "dialoguer",
+            "--campagne",
+            "S01",
+            "--tours",
+            "5",
+            "--bras",
+            "les_deux",
+            "--paralleles",
+            "4",
+            "--echelle-delais",
+            "0",
+            "--plafond-usd",
+            "1",
+            "--reprendre",
+            *options,
+        ]
         sortie = StringIO()
         with mock.patch.object(sys, "argv", argv), redirect_stdout(sortie):
             code = dialoguer.main()
@@ -89,7 +107,10 @@ class SimulationLocale(unittest.TestCase):
         corr = json.loads((self.runs / "S01/notation/correspondance.json").read_text(encoding="utf-8"))
         self.assertEqual(len(corr["dialogues"]), 9)
         for _ in range(2):
-            with mock.patch.object(sys, "argv", ["juger", "--campagne", "S01", "--paralleles", "4"]), redirect_stdout(StringIO()):
+            with (
+                mock.patch.object(sys, "argv", ["juger", "--campagne", "S01", "--paralleles", "4"]),
+                redirect_stdout(StringIO()),
+            ):
                 self.assertEqual(juger.main(), 0)
         lignes = []
         sorties = sorted((self.runs / "S01/juges").glob("*/*.json"))
@@ -107,8 +128,14 @@ class SimulationLocale(unittest.TestCase):
 
     def test_plafond_simule_arrete_avant_demarrage(self):
         # Le vrai plafond voit dix réservations de 0,04, pas des dépenses nulles.
-        with mock.patch.object(sys, "argv", ["dialoguer", "--campagne", "S01", "--plafond-usd", "0.1",
-                                               "--cout-estime-dialogue", "0.04"]), redirect_stdout(StringIO()):
+        with (
+            mock.patch.object(
+                sys,
+                "argv",
+                ["dialoguer", "--campagne", "S01", "--plafond-usd", "0.1", "--cout-estime-dialogue", "0.04"],
+            ),
+            redirect_stdout(StringIO()),
+        ):
             self.assertEqual(dialoguer.main(), 3)
         self.assertFalse(self.fichiers())
 
@@ -162,12 +189,16 @@ class GardeReseau(unittest.TestCase):
         udp = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
         self.addCleanup(tcp.close)
         self.addCleanup(udp.close)
-        operations = [lambda: socket.socket(), lambda: tcp.connect(("127.0.0.1", 9)),
-                      lambda: udp.sendto(b"aucun-envoi", ("127.0.0.1", 9)),
-                      lambda: socket.getaddrinfo("noa.invalid", 443),
-                      lambda: urllib.request.build_opener(urllib.request.ProxyHandler({})).open("http://noa.invalid"),
-                      lambda: subprocess.run([sys.executable, "-c", "pass"], check=True),
-                      lambda: sys.audit("os.fork"), lambda: os.system("false")]
+        operations = [
+            lambda: socket.socket(),
+            lambda: tcp.connect(("127.0.0.1", 9)),
+            lambda: udp.sendto(b"aucun-envoi", ("127.0.0.1", 9)),
+            lambda: socket.getaddrinfo("noa.invalid", 443),
+            lambda: urllib.request.build_opener(urllib.request.ProxyHandler({})).open("http://noa.invalid"),
+            lambda: subprocess.run([sys.executable, "-c", "pass"], check=True),
+            lambda: sys.audit("os.fork"),
+            lambda: os.system("false"),
+        ]
         with mock.patch.dict(os.environ, {"AIRFLOW__METRICS__STATSD_HOST": "127.0.0.1"}), simulation.reseau_interdit():
             for operation in operations:
                 with self.subTest(operation=operation), self.assertRaises(PermissionError):
@@ -204,18 +235,24 @@ class GardeReseau(unittest.TestCase):
         def corrompre(path):
             return b"{}" if path == cible else originale(path)
 
-        with simulation.reseau_interdit(), mock.patch.object(Path, "read_bytes", corrompre), self.assertRaises(ValueError):
+        with (
+            simulation.reseau_interdit(),
+            mock.patch.object(Path, "read_bytes", corrompre),
+            self.assertRaises(ValueError),
+        ):
             simulation.installer(dialoguer, chemins.JEUX_DEMO / "C01", 0)
 
     def test_metriques_n_emettent_meme_si_variable_statsd_presente(self):
-        with mock.patch.dict(os.environ, {"AIRFLOW__METRICS__STATSD_HOST": "127.0.0.1"}), \
-                mock.patch.object(socket, "socket", side_effect=AssertionError("réseau interdit")):
+        with (
+            mock.patch.dict(os.environ, {"AIRFLOW__METRICS__STATSD_HOST": "127.0.0.1"}),
+            mock.patch.object(socket, "socket", side_effect=AssertionError("réseau interdit")),
+        ):
             parallele.envoyer_jauge("simulation.test", 1)
 
 
 class ContratsEtConfiguration(unittest.TestCase):
     def test_imports_frais_sans_cles_et_sans_lecture_env(self):
-        code = '''import io, pathlib, sys
+        code = """import io, pathlib, sys
 original = io.open
 def protege(file, *a, **k):
     if pathlib.Path(file).name == '.env' or pathlib.Path(file).name.startswith('.env.'):
@@ -229,23 +266,26 @@ assert len(lire_toutes()) == 5
 for nom in ('openai', 'google.genai', 'pydantic', 'banc.dialogues.client_noa', 'banc.personas.moteur_persona'):
     assert nom not in sys.modules, nom
 print('imports propres')
-'''
+"""
         fin = subprocess.run([sys.executable, "-c", code], cwd=RACINE, env=ENV_PROPRE, capture_output=True, text=True)
         self.assertEqual(fin.returncode, 0, fin.stderr)
 
     def test_modes_cli_non_simules_et_anciens_points_entree_refuses(self):
-        commandes = [["-m", "banc.dialogues.dialoguer", "--campagne", "S01", "--mode", "test_fixe"],
-                     ["-m", "banc.dialogues.dialoguer", "--campagne", "C111"],
-                     ["-m", "banc.dialogues.dialoguer", "--campagne", "S01", "--simulation", "."],
-                     ["-m", "banc.dialogues.dialoguer", "--campagne", "S01", "--echelle-delais", "nan"],
-                     ["-m", "entrepot.preparer", "--campagne", "S01", "--mode", "reel"],
-                     ["-m", "banc.juges.juger", "--campagne", "S01", "--juges", "gemini"],
-                     ["-m", "infra.metabase_configurer", "--campagne", "S01", "--mode", "reel"],
-                     ["-m", "banc.campagnes.campagnes", "--verifier", "S01", "reel"]]
+        commandes = [
+            ["-m", "banc.dialogues.dialoguer", "--campagne", "S01", "--mode", "test_fixe"],
+            ["-m", "banc.dialogues.dialoguer", "--campagne", "C111"],
+            ["-m", "banc.dialogues.dialoguer", "--campagne", "S01", "--simulation", "."],
+            ["-m", "banc.dialogues.dialoguer", "--campagne", "S01", "--echelle-delais", "nan"],
+            ["-m", "entrepot.preparer", "--campagne", "S01", "--mode", "reel"],
+            ["-m", "banc.juges.juger", "--campagne", "S01", "--juges", "gemini"],
+            ["-m", "infra.metabase_configurer", "--campagne", "S01", "--mode", "reel"],
+            ["-m", "banc.campagnes.campagnes", "--verifier", "S01", "reel"],
+        ]
         for arguments in commandes:
             with self.subTest(arguments=arguments):
-                fin = subprocess.run([sys.executable, *arguments], cwd=RACINE, env=ENV_PROPRE,
-                                     text=True, capture_output=True, timeout=20)
+                fin = subprocess.run(
+                    [sys.executable, *arguments], cwd=RACINE, env=ENV_PROPRE, text=True, capture_output=True, timeout=20
+                )
                 self.assertNotEqual(fin.returncode, 0, fin.stdout)
                 self.assertNotIn("ModuleNotFoundError", fin.stderr)
 
@@ -253,9 +293,13 @@ print('imports propres')
         fiches = lire_toutes()
         self.assertEqual(len(fiches), 5)
         original = fiches[0].model_dump()
-        for chemin, valeur in ((["axes", "mineur"], True), (["fiche", "identite", "age"], 12),
-                               (["axes", "style_ecriture"], "inconnu"), (["identifiant"], "../interdit"),
-                               (["contraintes"], ["contrainte absente du rôle"])):
+        for chemin, valeur in (
+            (["axes", "mineur"], True),
+            (["fiche", "identite", "age"], 12),
+            (["axes", "style_ecriture"], "inconnu"),
+            (["identifiant"], "../interdit"),
+            (["contraintes"], ["contrainte absente du rôle"]),
+        ):
             copie = json.loads(json.dumps(original))
             courant = copie
             for cle in chemin[:-1]:

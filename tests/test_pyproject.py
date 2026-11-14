@@ -8,6 +8,7 @@ epinglages directs de pyproject.toml doivent figurer dans les fichiers generes.
 
 Lancer : python -m unittest tests.test_pyproject -v   (ou pytest)
 """
+
 from __future__ import annotations
 
 import shutil
@@ -82,17 +83,26 @@ class TestPyproject(unittest.TestCase):
     def test_fichiers_generes_identiques_a_uv_export(self) -> None:
         for fichier, options in GENERES.items():
             with self.subTest(fichier=fichier):
-                r = subprocess.run([UV, "export", "--frozen", "--offline", "--no-emit-project", "--no-hashes",
-                                    *options], cwd=RACINE, capture_output=True, text=True, encoding="utf-8")
+                r = subprocess.run(
+                    [UV, "export", "--frozen", "--offline", "--no-emit-project", "--no-hashes", *options],
+                    cwd=RACINE,
+                    capture_output=True,
+                    text=True,
+                    encoding="utf-8",
+                )
                 self.assertEqual(r.returncode, 0, r.stderr)
-                self.assertEqual(exigences((RACINE / fichier).read_text("utf-8")), exigences(r.stdout),
-                                 f"{fichier} a regenerer : uv export --frozen --no-emit-project --no-hashes "
-                                 f"{' '.join(options)} -o {fichier}")
+                self.assertEqual(
+                    exigences((RACINE / fichier).read_text("utf-8")),
+                    exigences(r.stdout),
+                    f"{fichier} a regenerer : uv export --frozen --no-emit-project --no-hashes "
+                    f"{' '.join(options)} -o {fichier}",
+                )
 
     @unittest.skipUnless(UV, "uv absent")
     def test_verrou_a_jour(self) -> None:
-        r = subprocess.run([UV, "lock", "--check", "--offline"], cwd=RACINE, capture_output=True, text=True,
-                           encoding="utf-8")
+        r = subprocess.run(
+            [UV, "lock", "--check", "--offline"], cwd=RACINE, capture_output=True, text=True, encoding="utf-8"
+        )
         self.assertEqual(r.returncode, 0, f"uv.lock en retard sur pyproject.toml (uv lock) : {r.stderr}")
 
 

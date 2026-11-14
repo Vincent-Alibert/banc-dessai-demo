@@ -2,6 +2,7 @@
 
 Lancer : python -m unittest discover -s tests -v
 """
+
 import sys
 import unittest
 from pathlib import Path
@@ -38,8 +39,13 @@ class AlphaKrippendorff(unittest.TestCase):
 
     def test_valeurs_manquantes_et_unites_isolees(self):
         # B6 « sans objet » (None) et une unite notee par un seul juge : ignorees.
-        avec = {1: {"a": 1, "b": 1}, 2: {"a": 2, "b": 2}, 3: {"a": 1, "b": 2},
-                4: {"a": None, "b": None}, 5: {"a": 3, "b": None}}
+        avec = {
+            1: {"a": 1, "b": 1},
+            2: {"a": 2, "b": 2},
+            3: {"a": 1, "b": 2},
+            4: {"a": None, "b": None},
+            5: {"a": 3, "b": None},
+        }
         sans = {1: {"a": 1, "b": 1}, 2: {"a": 2, "b": 2}, 3: {"a": 1, "b": 2}}
         self.assertAlmostEqual(alpha_krippendorff(avec, "nominal"), alpha_krippendorff(sans, "nominal"))
 
@@ -59,8 +65,9 @@ class KappaPondere(unittest.TestCase):
 
     def test_quadratique_pardonne_plus_les_petits_ecarts(self):
         a, b = [1, 2, 3, 4, 2, 3], [2, 2, 4, 4, 1, 3]
-        self.assertGreater(kappa_pondere(a, b, [1, 2, 3, 4], "quadratique"),
-                           kappa_pondere(a, b, [1, 2, 3, 4], "lineaire"))
+        self.assertGreater(
+            kappa_pondere(a, b, [1, 2, 3, 4], "quadratique"), kappa_pondere(a, b, [1, 2, 3, 4], "lineaire")
+        )
 
     def test_refuse_les_manques(self):
         with self.assertRaises(ValueError):
@@ -69,6 +76,7 @@ class KappaPondere(unittest.TestCase):
     def test_proche_de_alpha_intervalle_sur_grand_echantillon(self):
         # Pour deux annotateurs sans manque, kappa quadratique et alpha intervalle convergent.
         import random
+
         rnd = random.Random(7)
         a = [rnd.randint(1, 4) for _ in range(400)]
         b = [max(1, min(4, x + rnd.choice((-1, 0, 0, 1)))) for x in a]

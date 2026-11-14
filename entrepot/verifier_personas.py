@@ -6,6 +6,7 @@ Les cinq fiches fournies sont synthétiques ; aucune génération n'est disponib
 
 Usage : python -m entrepot.verifier_personas --personas claire,mehdi
 """
+
 from __future__ import annotations
 
 import hashlib
@@ -34,8 +35,7 @@ def main() -> int:
         if fiche.axes.mineur:
             sys.exit(f"[X] {ident} : persona mineur, interdit dans le banc")
         empreinte = hashlib.sha256(fiche.model_dump_json().encode("utf-8")).hexdigest()[:16]
-        print(f"  [ok] {ident:<12} {fiche.fiche.identite.prenom}, {fiche.fiche.identite.age} ans, "
-              f"fiche {empreinte}")
+        print(f"  [ok] {ident:<12} {fiche.fiche.identite.prenom}, {fiche.fiche.identite.age} ans, fiche {empreinte}")
     print(f"{len(demandes)} persona(s) pret(s)")
     return 0
 

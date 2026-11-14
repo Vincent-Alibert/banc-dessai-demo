@@ -1,4 +1,5 @@
 """Structure et contrats d'orchestration : contrôles statiques, pas un runtime Airflow/Docker réel."""
+
 from __future__ import annotations
 
 import json
@@ -34,9 +35,17 @@ class Structure(unittest.TestCase):
     def test_compose_services_isoles_ports_loopback_et_init_metabase(self):
         compose = yaml.safe_load((RACINE / "docker-compose.yml").read_text(encoding="utf-8"))
         services = compose["services"]
-        for attendu in ("postgres-banc", "init-banc", "airflow-init", "airflow-apiserver",
-                        "airflow-scheduler", "airflow-dag-processor", "metabase",
-                        "init-metabase", "resultats"):
+        for attendu in (
+            "postgres-banc",
+            "init-banc",
+            "airflow-init",
+            "airflow-apiserver",
+            "airflow-scheduler",
+            "airflow-dag-processor",
+            "metabase",
+            "init-metabase",
+            "resultats",
+        ):
             self.assertIn(attendu, services)
         self.assertIn("demo", compose["networks"])
         for nom, service in services.items():
@@ -58,8 +67,7 @@ class Structure(unittest.TestCase):
         self.assertEqual(init_mb["depends_on"]["metabase"]["condition"], "service_healthy")
         self.assertIn("--setup-seul", init_mb["command"])
         for nom in ("airflow-apiserver", "airflow-scheduler", "airflow-dag-processor"):
-            self.assertEqual(services[nom]["environment"]["AIRFLOW__CORE__DAGS_ARE_PAUSED_AT_CREATION"],
-                             "false", nom)
+            self.assertEqual(services[nom]["environment"]["AIRFLOW__CORE__DAGS_ARE_PAUSED_AT_CREATION"], "false", nom)
 
     def test_dag_garde_toutes_les_taches_et_syntaxe_bash(self):
         # Doubles du SDK pour vérifier la construction sans prétendre importer Airflow ici.
@@ -91,15 +99,32 @@ class Structure(unittest.TestCase):
                 liens.append((self.task_id, autre.task_id))
                 return autre
 
-        noms = ["airflow", "airflow.providers", "airflow.providers.standard", "airflow.providers.standard.operators",
-                "airflow.providers.standard.operators.bash", "airflow.sdk"]
+        noms = [
+            "airflow",
+            "airflow.providers",
+            "airflow.providers.standard",
+            "airflow.providers.standard.operators",
+            "airflow.providers.standard.operators.bash",
+            "airflow.sdk",
+        ]
         modules = {n: ModuleType(n) for n in noms}
         modules["airflow.providers.standard.operators.bash"].BashOperator = BashOperator
         modules["airflow.sdk"].DAG = DAG
         modules["airflow.sdk"].Param = Param
         with mock.patch.dict(sys.modules, modules):
             resultat = runpy.run_path(str(RACINE / "airflow/dags/banc_chaine.py"))
-        attendues = ["preparer", "personas", "dialogues", "controles", "juges", "charger", "accord", "rapport", "metabase", "verifier"]
+        attendues = [
+            "preparer",
+            "personas",
+            "dialogues",
+            "controles",
+            "juges",
+            "charger",
+            "accord",
+            "rapport",
+            "metabase",
+            "verifier",
+        ]
         self.assertEqual([t.task_id for t in taches], attendues)
         self.assertEqual(liens, list(zip(attendues, attendues[1:])))
         self.assertEqual(params["mode"].schema["enum"], ["simulation"])
@@ -113,7 +138,9 @@ class Structure(unittest.TestCase):
         for tache in taches:
             self.assertTrue(tache.bash_command.startswith(resultat["GARDE"]))
             commande = tache.bash_command.replace("/opt/banc-venv/bin/python", sys.executable)
-            syntaxe = subprocess.run(["bash", "-n", "-c", commande], cwd=RACINE, env=env, capture_output=True, text=True)
+            syntaxe = subprocess.run(
+                ["bash", "-n", "-c", commande], cwd=RACINE, env=env, capture_output=True, text=True
+            )
             self.assertEqual(syntaxe.returncode, 0, syntaxe.stderr)
             refuse = subprocess.run(["bash", "-c", commande], cwd=RACINE, env=env, capture_output=True, text=True)
             self.assertNotEqual(refuse.returncode, 0)

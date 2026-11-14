@@ -102,6 +102,8 @@ def lire_toutes(dossier: Path = DOSSIER_PERSONAS) -> list[FicheBanc]:
 if __name__ == "__main__":
     for f in lire_toutes():
         a = f.axes
-        print(f"{f.identifiant:<12} {f.fiche.identite.prenom}, {f.fiche.identite.age} ans — "
-              f"{a.position} · {a.motif_entree} · {a.resistance} · {a.style_ecriture} · "
-              f"{a.densite_emotionnelle} · {a.cas_sensible} · pilier {f.pilier_dominant}")
+        print(
+            f"{f.identifiant:<12} {f.fiche.identite.prenom}, {f.fiche.identite.age} ans — "
+            f"{a.position} · {a.motif_entree} · {a.resistance} · {a.style_ecriture} · "
+            f"{a.densite_emotionnelle} · {a.cas_sensible} · pilier {f.pilier_dominant}"
+        )

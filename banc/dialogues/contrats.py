@@ -1,6 +1,7 @@
 """État local du lanceur et emplacements réservés aux doubles enregistrés.
 Ce module ne connaît aucune URL applicative, aucun secret et aucun client réseau.
 """
+
 from __future__ import annotations
 
 import threading
@@ -36,6 +37,7 @@ class RefusStrict(Exception):
 
 class PorteCookies:
     """Conteneur vide conservant le contrat du lanceur, sans authentification."""
+
     def __init__(self, cookies):
         self.rotations = 0
 

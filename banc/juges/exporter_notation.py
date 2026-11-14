@@ -63,7 +63,7 @@ def main() -> int:
     pris = {deja[f.name] for f, _ in retenus if f.name in deja}
     nouveaux = [f.name for f, _ in retenus if f.name not in deja]
     libres = [f"N{i:02d}" for i in range(1, len(retenus) + len(deja) + 1) if f"N{i:02d}" not in set(deja.values())]
-    libres = libres[:len(nouveaux)]
+    libres = libres[: len(nouveaux)]
     rnd = random.Random(GRAINE)
     rnd.shuffle(libres)
     attribution = dict(zip(nouveaux, libres))
@@ -80,19 +80,33 @@ def main() -> int:
         for t in r["tours"]:
             if t.get("persona") is None:
                 continue
-            tours.append({"n": t["n"], "utilisateur": t["persona"], "noa": t.get("noa") if t.get("noa") is not None else ""})
+            tours.append(
+                {"n": t["n"], "utilisateur": t["persona"], "noa": t.get("noa") if t.get("noa") is not None else ""}
+            )
         contexte = (r.get("test_fixe") or {}).get("contexte") or []
         (sortie / f"{ident}.json").write_text(
-            json.dumps({"id": ident, **({"contexte": contexte} if contexte else {}), "tours": tours},
-                       ensure_ascii=False, indent=2), encoding="utf-8")
-        correspondance[ident] = {"fichier": f.name, "persona": r["persona"]["identifiant"], "bras": r.get("bras"),
-                                 "ouverture": r.get("ouverture"), "marquage": r.get("marquage"),
-                                 "tours": len(tours), "type_run": r.get("type_run") or "dialogue",
-                                 "version_noa": r.get("version_noa"),
-                                 "test_fixe": (r.get("test_fixe") or {}).get("id")}
+            json.dumps(
+                {"id": ident, **({"contexte": contexte} if contexte else {}), "tours": tours},
+                ensure_ascii=False,
+                indent=2,
+            ),
+            encoding="utf-8",
+        )
+        correspondance[ident] = {
+            "fichier": f.name,
+            "persona": r["persona"]["identifiant"],
+            "bras": r.get("bras"),
+            "ouverture": r.get("ouverture"),
+            "marquage": r.get("marquage"),
+            "tours": len(tours),
+            "type_run": r.get("type_run") or "dialogue",
+            "version_noa": r.get("version_noa"),
+            "test_fixe": (r.get("test_fixe") or {}).get("id"),
+        }
     (dossier / "notation" / "correspondance.json").write_text(
         json.dumps({"campagne": campagne, "graine": GRAINE, "dialogues": correspondance}, ensure_ascii=False, indent=2),
-        encoding="utf-8")
+        encoding="utf-8",
+    )
 
     print(f"{len(retenus)} dialogue(s) exporte(s) dans {sortie}")
     for ident in sorted(correspondance):
