@@ -70,6 +70,8 @@ Une fois le DAG exécuté avec succès, les résultats sont accessibles sur les 
 - Email : `demo@banc.local`
 - Mot de passe : `demo-banc-noa-2026`
 
+Mots de passe de démonstration, locaux uniquement : tous ceux qui figurent dans ce dépôt (README, `docker-compose.yml`, code et tests) ne protègent que cette pile locale et ne doivent jamais servir ailleurs.
+
 Le tableau de bord Metabase créé par la tâche `metabase` affiche l'état d'exécution, la distribution des notes factices par axe d'évaluation, les incidents du scénario, ainsi que les mesures d'accord entre juges (alpha de Krippendorff et kappa quadratique).
 
 ---
