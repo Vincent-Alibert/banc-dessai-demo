@@ -5,6 +5,7 @@ from __future__ import annotations
 
 import hashlib
 import json
+import math
 import re
 import sys
 from pathlib import Path
@@ -12,11 +13,9 @@ from pathlib import Path
 RACINE = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(RACINE))
 from banc import chemins  # noqa: E402
-from banc.campagnes import campagnes  # noqa: E402
 from entrepot.connexion import connecter  # noqa: E402
 from entrepot.migrer import verifier  # noqa: E402
 from banc.garde import campagne_valide, exiger_simulation  # noqa: E402
-import math
 
 DOSSIER_DBT = RACINE / "dbt"
 

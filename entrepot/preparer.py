@@ -2,8 +2,6 @@
 from __future__ import annotations
 
 import argparse
-from contextlib import ExitStack
-from pathlib import Path
 import sys
 
 from banc import chemins

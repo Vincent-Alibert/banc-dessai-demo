@@ -10,7 +10,6 @@ Une fiche du banc est un fichier JSON dans personas/, valide a la lecture.
 
 from __future__ import annotations
 
-import json
 from pathlib import Path
 from dataclasses import dataclass, field
 

@@ -5,7 +5,6 @@ Les coûts payés sont nuls ; cout.simule_usd conserve le scénario historique p
 from __future__ import annotations
 
 import json
-import os
 import sys
 import threading
 import time

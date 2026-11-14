@@ -15,7 +15,7 @@ from pathlib import Path
 RACINE = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(RACINE))
 from banc.personas.fiche_banc import DOSSIER_PERSONAS, lire  # noqa: E402
-from banc.garde import campagne_valide, exiger_simulation, personas_valides
+from banc.garde import exiger_simulation, personas_valides  # noqa: E402
 
 
 def main() -> int:

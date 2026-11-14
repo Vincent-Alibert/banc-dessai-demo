@@ -23,7 +23,7 @@ from banc.dialogues import contrats as etat_simulation
 from banc.personas.fiche_banc import FicheBanc, lire_toutes, plafond_mots
 from banc.personas import reponses as moteur_persona
 from banc.personas.reponses import MODELE as MODELE_PERSONA, VERSIONS_PERSONA, definir_graine, normaliser, repondre
-from banc.campagnes.parallele import (PARALLELES_MAX, LimiteDebit, Pause429, Plafond, attendre_interruptible, compter_appel,
+from banc.campagnes.parallele import (PARALLELES_MAX, LimiteDebit, Pause429, Plafond, compter_appel,
                        compter_exception, definir_campagne_direct, envoyer_direct, envoyer_jauge, executer,
                        verifier_interruption, verrou_lanceur)
 from banc.dialogues.contrats import (

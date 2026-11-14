@@ -2,7 +2,6 @@
 from __future__ import annotations
 
 import ast
-from collections import Counter
 import hashlib
 import importlib.util
 import json

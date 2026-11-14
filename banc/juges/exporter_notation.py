@@ -24,7 +24,7 @@ import random
 import sys
 
 from banc import chemins
-from banc.garde import campagne_valide, exiger_simulation, personas_valides
+from banc.garde import campagne_valide, exiger_simulation
 
 RUNS = chemins.RUNS
 GRAINE = 20261009

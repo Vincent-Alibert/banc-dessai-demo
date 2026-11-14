@@ -12,7 +12,6 @@ import time
 import urllib.error
 import urllib.request
 from urllib.parse import urlsplit
-from pathlib import Path
 
 from banc import chemins
 from banc.garde import campagne_valide, exiger_simulation

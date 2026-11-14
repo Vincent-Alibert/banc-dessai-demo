@@ -41,7 +41,7 @@ from datetime import datetime, timezone
 from pathlib import Path
 
 from banc import chemins
-from banc.garde import campagne_valide, exiger_simulation, personas_valides
+from banc.garde import campagne_valide, exiger_simulation
 from banc.personas.coherence_depart import controler_depart, departs_ecartes
 
 RUNS = chemins.RUNS
