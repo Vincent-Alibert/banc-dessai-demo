@@ -1,0 +1,85 @@
+# Projet Python du depot de demonstration du banc d'essai de Noa (PEP 621), gere par uv. CE FICHIER et uv.lock
+# (verrou commite) sont la source de verite des versions.
+# Installation, en local comme en CI, depuis la racine du depot :
+#   uv sync --frozen                 # le code en mode editable + le groupe dev, versions exactes du verrou
+#   uv run poe check-all             # lint, format, mypy, tests, securite
+# Python ~=3.12.0 : aligne sur l'image Airflow (apache/airflow:3.3.2-python3.12, docker/airflow/Dockerfile).
+# requirements.txt et dbt/requirements.txt restent l'entree de l'image ; ils sont GENERES depuis le verrou :
+#   uv export --frozen --no-emit-project --no-dev --no-hashes -o requirements.txt
+#   uv export --frozen --no-emit-project --only-group dbt --no-hashes -o dbt/requirements.txt
+# et tests/test_pyproject.py echoue s'ils s'en ecartent.
+# Installation EDITABLE seulement. Airflow n'est pas une dependance : il vit dans son image. dbt tourne dans un
+# environnement a part (/opt/dbt-venv) : groupe « dbt », jamais installe avec le reste.
+
+[build-system]
+requires = ["setuptools==84.2.1"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "banc-dessai-demo"
+version = "1.0.0"
+description = "Banc d'essai de Noa, version de demonstration : simulation locale, entrepot, dbt et Airflow."
+readme = "README.md"
+requires-python = "~=3.12.0"
+dependencies = [
+    "psycopg[binary]==3.3.6",    # entrepot Postgres (entrepot/connexion.py)
+]
+
+[dependency-groups]
+dev = [
+    "pytest==9.0.3",
+    "pytest-cov==7.1.0",
+    "ruff==0.17.5",
+    "mypy==2.4.1",
+    "poethepoet==0.49.0",
+    "pip-audit==2.10.1",
+    "bandit==1.9.4",
+    # controles de infra/verifier_sources.py et tests/test_structure.py (sinon « non execute »)
+    "PyYAML==6.0.3",
+    "Jinja2==3.1.6",
+]
+# versions de dbt/requirements.txt (image Airflow, /opt/dbt-venv)
+dbt = [
+    "dbt-core==1.11.16",
+    "dbt-postgres==1.11.0",
+]
+
+[tool.uv]
+default-groups = ["dev"]
+# dbt et dev ne s'installent jamais ensemble (pathspec : dbt-core 1.11.16 veut < 0.13, mypy 2.4.1 >= 1.0)
+conflicts = [[{ group = "dev" }, { group = "dbt" }]]
+
+[tool.setuptools.packages.find]
+include = ["banc*", "entrepot*", "infra*"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+
+[tool.coverage.run]
+source = ["banc", "entrepot", "infra"]
+
+[tool.ruff]
+target-version = "py312"
+
+[tool.ruff.lint]
+# Regles choisies explicitement : le jeu par defaut de ruff change d'une version a l'autre.
+select = ["E4", "E7", "E9", "F"]
+# Comme le banc : variables d'une lettre (l), plusieurs instructions sur une ligne (;), lambda nommee.
+ignore = ["E741", "E702", "E731"]
+
+[tool.mypy]
+python_version = "3.12"
+
+[tool.poe.tasks]
+test = "pytest --cov --cov-report=term --cov-report=html --cov-report=xml --junitxml=rapport-junit.xml"
+lint = "ruff check ."
+fmt = "ruff format ."
+format-check = "ruff format --check ."
+security = "pip-audit --skip-editable"
+bandit = "bandit -r . -x ./tests,./.venv,./.uv-cache -q --severity-level high"
+mypy = "mypy banc"
+
+[tool.poe.tasks.check-all]
+help = "Toutes les verifications, sans s'arreter au premier echec ; code non nul si l'une echoue"
+sequence = ["lint", "format-check", "mypy", "test", "security", "bandit"]
+ignore_fail = "return_non_zero"

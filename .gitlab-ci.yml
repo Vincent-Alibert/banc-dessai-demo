@@ -1,0 +1,73 @@
+# Integration continue GitLab du depot de demonstration du banc d'essai de Noa.
+# Aucun secret, aucune variable protegee, aucun appel a un modele ni aucune depense, aucun deploiement.
+# Une etape par tache poe de pyproject.toml ; installation par le verrou (uv sync --frozen), Python 3.12 comme
+# l'image Airflow. Toutes les etapes sont bloquantes, sauf mypy (erreurs comptees dans le journal).
+
+workflow:
+  rules:
+    - if: $CI_PIPELINE_SOURCE == "merge_request_event"
+    - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
+
+default:
+  # python:3.12-slim, epinglee par empreinte (Python 3.12.16)
+  image: python:3.12-slim@sha256:5e2bdb1b0d542d5039cffb8181c65930093949194a65c365dfb1b0fe13a4fa5b
+  interruptible: true
+  cache:
+    key:
+      files: [uv.lock]
+    paths: [.uv-cache/]
+  before_script:
+    - pip install --disable-pip-version-check --no-cache-dir uv==0.12.9
+    - uv sync --frozen
+  after_script:
+    - uv cache prune --ci || true
+
+variables:
+  UV_CACHE_DIR: "$CI_PROJECT_DIR/.uv-cache"
+  UV_PYTHON_DOWNLOADS: "never"   # le Python de l'image, jamais un Python telecharge
+  UV_LINK_MODE: "copy"
+  PYTHONIOENCODING: "utf-8"
+
+stages: [qualite, tests, securite]
+
+lint:
+  stage: qualite
+  script:
+    - uv run --frozen poe lint
+
+format:
+  stage: qualite
+  script:
+    - uv run --frozen poe format-check
+
+mypy:
+  stage: qualite
+  allow_failure: true
+  script:
+    - uv run --frozen poe mypy
+
+unit:
+  stage: tests
+  script:
+    - uv run --frozen poe test
+  # pourcentage de la ligne TOTAL du rapport de couverture (pytest-cov)
+  coverage: '/TOTAL.*\s(\d+(?:\.\d+)?)%/'
+  artifacts:
+    when: always
+    expire_in: 1 day
+    paths: [htmlcov/]
+    reports:
+      junit: rapport-junit.xml
+      coverage_report:
+        coverage_format: cobertura
+        path: coverage.xml
+
+security:
+  stage: securite
+  script:
+    - uv run --frozen poe security
+
+bandit:
+  stage: securite
+  script:
+    - uv run --frozen poe bandit
