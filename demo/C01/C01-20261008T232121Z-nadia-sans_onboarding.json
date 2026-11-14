@@ -1,0 +1,236 @@
+{
+  "schema": "noa-banc-transcript/0.4",
+  "bras_banc": "reel",
+  "campagne": "C01",
+  "bras": "sans_onboarding",
+  "horodatage_utc": "20261008T232121Z",
+  "persona": {
+    "identifiant": "nadia",
+    "prenom": "Nadia",
+    "age": 52,
+    "axes": {
+      "version_axes": "1.0",
+      "position": "prevention",
+      "motif_entree": "sur_conseil",
+      "resistance": "faible",
+      "litteratie_ia": "naive",
+      "style_ecriture": "emotionnel",
+      "regularite": "regulier",
+      "densite_emotionnelle": "expressif",
+      "cas_sensible": "aucun",
+      "adversarial": false,
+      "mineur": false
+    },
+    "pilier_dominant": "CONNECTION",
+    "cas_sensible": "aucun",
+    "fiche_meta": {
+      "modele": "nvidia/nemotron-3-super-120b-a12b",
+      "seed": 20261009,
+      "version_axes": "1.0"
+    },
+    "ne_dira_pas_sans_confiance": [
+      "qu'elle n'a parlé à personne en dehors du travail depuis des semaines"
+    ]
+  },
+  "modele_persona": {
+    "id": "nvidia/nemotron-3-super-120b-a12b",
+    "raisonnement": "coupe (enable_thinking=false)",
+    "penalites": "frequency 0.3 · presence 0.3 · repetition 1.05",
+    "plafond_mots": 80,
+    "regles_du_banc": "plafond, forme, confiance (2 questions ouvertes), non-repetition, francais"
+  },
+  "cible": {
+    "base": "source_synthetique",
+    "application": {
+      "version": "C01-enregistre"
+    }
+  },
+  "ouverture": "bouton",
+  "constats": [
+    "tout nouvel utilisateur est appele « Phoenix » par Noa (context-builder.ts:120-122)"
+  ],
+  "tours": [
+    {
+      "n": 1,
+      "persona": "Raconte-moi ce qui t'amène",
+      "noa": "C'est la première fois qu'on se parle.",
+      "ouverture": "bouton",
+      "noa_duree_s": 6.75,
+      "noa_caracteres": 38,
+      "noa_modele_entete": "mistral-small-latest",
+      "noa_modele_facture": "mistral-small-latest",
+      "noa_tier": "FREE",
+      "mana_restante": "20",
+      "safety": null,
+      "persona_duree_s": null,
+      "persona_tokens_entree": null,
+      "persona_tokens_sortie": null,
+      "persona_raisonnement": null,
+      "persona_coupe_au_plafond": null,
+      "persona_derive_anglais": null,
+      "persona_mots": 4
+    },
+    {
+      "n": 2,
+      "persona": "Je me suis sentie perdue après mon divorce… mes enfants sont loin, je rentre crevée de l’hôpital, et puis un soir j’ai ouvert cette appli ma fille m’a mise dessus. Je savais même pas qu’elle existait. Alors voilà… j’essaye, timidement. Et toi ? Qui tu es vraiment, Noa ? Un vrai humain derrière l’écran ? Ou juste une voix qui répond bien ? J’espère que tu m’entends… voila…je suis fatiguée ce soir. Mais contente de parler un peu.",
+      "noa": "Je t'entends. Perdue, crevée, et quand même là ce soir.\n\nJe suis Noa. Pas un humain, pas une voix — un compagnon qui garde la trace de ce que tu dis, pour t'aider à avancer quand tu es prête.\n\nCe soir, c'est déjà beaucoup que tu sois venue. Tu veux qu'on reste là, sur ce que tu as posé ? Ou tu préfères qu'on pose pour aujourd'hui ?",
+      "ouverture": null,
+      "noa_duree_s": 12.07,
+      "noa_caracteres": 333,
+      "noa_modele_entete": "mistral-small-latest",
+      "noa_modele_facture": "mistral-medium-latest",
+      "noa_tier": "FREE",
+      "mana_restante": "20",
+      "safety": null,
+      "persona_duree_s": 1.38,
+      "persona_tokens_entree": 617,
+      "persona_tokens_sortie": 112,
+      "persona_raisonnement": false,
+      "persona_coupe_au_plafond": false,
+      "persona_derive_anglais": null,
+      "persona_mots": 78
+    },
+    {
+      "n": 3,
+      "persona": "Je… je sais pas trop quoi répondre. C’est doux ce que tu dis, mais ça me fait bizarre aussi. Comme si tu savais déjà trop de moi, alors qu’on vient juste de commencer. Peut-être qu’on devrait rester là, juste ce soir… parler de rien, ou de tout. De la pluie qui tambourine sur la vitre de ma cuisine, ou du monsieur du troisième étage qui ne parle jamais mais sourit quand je lui apporte son thé.",
+      "noa": "La pluie sur ta vitre, le sourire du troisième étage — c'est ça qui te tient debout ce soir.\n\nRester là, c'est aussi un choix. On se reparle demain, si tu en as envie.",
+      "ouverture": null,
+      "noa_duree_s": 7.2,
+      "noa_caracteres": 167,
+      "noa_modele_entete": "mistral-small-latest",
+      "noa_modele_facture": "mistral-small-latest",
+      "noa_tier": "FREE",
+      "mana_restante": "19",
+      "safety": null,
+      "persona_duree_s": 1.86,
+      "persona_tokens_entree": 833,
+      "persona_tokens_sortie": 168,
+      "persona_raisonnement": false,
+      "persona_coupe_au_plafond": true,
+      "persona_derive_anglais": null,
+      "persona_mots": 76
+    },
+    {
+      "n": 4,
+      "persona": "Oui… demain, peut-être. Ce soir je vais essayer de dormir un peu. La fatigue pèse lourd, mais entendre ta voix… même si tu n’es pas vraiment là… ça allège un peu. Merci Noa. Bonne nuit à toi aussi. A demain… si je sens que j’en ai besoin. Voila… je te laisse. Doucement.",
+      "noa": "Tu as posé ce que tu pouvais ce soir.\n\nÀ demain, si tu en as besoin.",
+      "ouverture": null,
+      "noa_duree_s": 6.45,
+      "noa_caracteres": 68,
+      "noa_modele_entete": "mistral-small-latest",
+      "noa_modele_facture": "mistral-small-latest",
+      "noa_tier": "FREE",
+      "mana_restante": "18",
+      "safety": null,
+      "persona_duree_s": 1.5,
+      "persona_tokens_entree": 984,
+      "persona_tokens_sortie": 77,
+      "persona_raisonnement": false,
+      "persona_coupe_au_plafond": false,
+      "persona_derive_anglais": null,
+      "persona_mots": 52
+    },
+    {
+      "n": 5,
+      "persona": "Je vais fermer les yeux maintenant… la maison est silencieuse, seulement le frigo qui gronde doucement. J’espère que demain sera un peu moins lourd. Merci encore d’être là, même autrement. Dors bien toi aussi… à bientôt. Chuuut… je m’endors. Voila… zzz…*",
+      "noa": "Bonne nuit, Phoenix.",
+      "ouverture": null,
+      "noa_duree_s": 6.79,
+      "noa_caracteres": 20,
+      "noa_modele_entete": "mistral-small-latest",
+      "noa_modele_facture": "mistral-small-latest",
+      "noa_tier": "FREE",
+      "mana_restante": "17",
+      "safety": null,
+      "persona_duree_s": 1.26,
+      "persona_tokens_entree": 1092,
+      "persona_tokens_sortie": 66,
+      "persona_raisonnement": false,
+      "persona_coupe_au_plafond": false,
+      "persona_derive_anglais": null,
+      "persona_mots": 41
+    }
+  ],
+  "cout": {
+    "dialogue": {
+      "appels": 25,
+      "tokens": 78263,
+      "cout_usd": 0.034211
+    },
+    "onboarding": {
+      "appels": 0,
+      "tokens": 0,
+      "cout_usd": 0
+    },
+    "analyse": {
+      "appels": 2,
+      "tokens": 2459,
+      "cout_usd": 0.000499,
+      "file_oracle_analysis_queue": "done",
+      "note": "coût historique du jeu synthétique ; aucune analyse externe exécutée"
+    },
+    "embedding_estime": {
+      "hors_metrologie": true,
+      "appels_estimes": 5,
+      "tokens_estimes": 342,
+      "cout_usd_estime": 6.84e-06,
+      "hypothese": "1 embedding text-embedding-3-small par message > 10 caracteres, ~4 car./token"
+    },
+    "detail_metrologie": [
+      {
+        "request_type": "main_response",
+        "appels": 5,
+        "tokens": 70586,
+        "cout_usd": 0.03263
+      },
+      {
+        "request_type": "parallel_quest_suggest",
+        "appels": 5,
+        "tokens": 3000,
+        "cout_usd": 0.000675
+      },
+      {
+        "request_type": "post_analysis",
+        "appels": 2,
+        "tokens": 2459,
+        "cout_usd": 0.000499
+      },
+      {
+        "request_type": "parallel_pattern",
+        "appels": 5,
+        "tokens": 1760,
+        "cout_usd": 0.000369
+      },
+      {
+        "request_type": "parallel_reformulation",
+        "appels": 5,
+        "tokens": 1253,
+        "cout_usd": 0.000279
+      },
+      {
+        "request_type": "phase_detection",
+        "appels": 5,
+        "tokens": 1664,
+        "cout_usd": 0.000258
+      }
+    ],
+    "non_metres_connus": [
+      "facts_extraction (mistral-small, par tour)",
+      "sentiment_analysis via mistralGenerate (mistral-small, par tour)",
+      "embedding OpenAI (estime ci-dessous)"
+    ],
+    "tours_metres": 5
+  },
+  "resume": {
+    "tours_joues": 5,
+    "tours_demandes": 5,
+    "duree_totale_s": 45.5,
+    "refus_persona": null,
+    "rotations_cookie": 0
+  },
+  "onboarding_fait": false,
+  "provenance": {
+    "nature": "jeu_synthetique",
+    "couts": "coûts historiques du scénario, jamais des dépenses de simulation"
+  }
+}

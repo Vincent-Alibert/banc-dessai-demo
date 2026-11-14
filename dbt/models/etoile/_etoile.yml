@@ -1,0 +1,389 @@
+version: 2
+models:
+- name: dim_campagne
+  description: Campagnes S* de simulation uniquement.
+  columns:
+  - name: campagne_id
+    description: Code S01, S02… de simulation.
+    data_tests:
+    - unique
+    - not_null
+  - name: est_test
+    data_tests:
+    - not_null
+  - name: est_finale
+    description: 'Campagne finale : la variable dbt campagne_finale (vide tant qu''elle
+      n''est pas fixée).'
+    data_tests:
+    - not_null
+- name: dim_persona
+  description: 'Personas, évolution lente de type 2 : une ligne par version de fiche
+    (identifiant + empreinte).'
+  columns:
+  - name: persona_cle
+    data_tests:
+    - unique
+    - not_null
+  - name: identifiant
+    data_tests:
+    - not_null
+  - name: empreinte_fiche
+    data_tests:
+    - not_null
+  - name: mineur
+    description: Aucun persona mineur dans le banc (décision du 4 septembre 2026).
+    data_tests:
+    - not_null
+    - accepted_values:
+        arguments:
+          values:
+          - false
+          quote: false
+  - name: jeu
+    description: Jeu synthétique fourni.
+    data_tests:
+    - not_null
+    - accepted_values:
+        arguments:
+          values:
+          - synthetique
+- name: dim_juge
+  description: 'Juges : un par nom, modèle exact et version de prompt.'
+  columns:
+  - name: juge_cle
+    data_tests:
+    - unique
+    - not_null
+  - name: nom
+    data_tests:
+    - not_null
+  - name: version_prompt
+    data_tests:
+    - not_null
+  - name: preversion
+    data_tests:
+    - not_null
+  - name: type_juge
+    data_tests:
+    - not_null
+    - accepted_values:
+        arguments:
+          values:
+          - factice
+- name: dim_axe
+  description: 'Axes de la grille, versionnés : une ligne par axe et par version.'
+  columns:
+  - name: axe_id
+    data_tests:
+    - not_null
+  - name: version_grille
+    data_tests:
+    - not_null
+  - name: libelle
+    data_tests:
+    - not_null
+  - name: definition
+    data_tests:
+    - not_null
+- name: dim_run
+  description: Runs de dialogue.
+  columns:
+  - name: run_id
+    data_tests:
+    - unique
+    - not_null
+  - name: campagne_id
+    data_tests:
+    - not_null
+    - relationships:
+        arguments:
+          to: ref('dim_campagne')
+          field: campagne_id
+  - name: persona_cle
+    data_tests:
+    - not_null
+    - relationships:
+        arguments:
+          to: ref('dim_persona')
+          field: persona_cle
+  - name: statut
+    data_tests:
+    - not_null
+    - accepted_values:
+        arguments:
+          values:
+          - complet
+          - interrompu_produit
+          - hors_notation
+          - echec_banc
+  - name: fichier_source
+    data_tests:
+    - not_null
+  - name: type_run
+    data_tests:
+    - not_null
+    - accepted_values:
+        arguments:
+          values:
+          - dialogue
+  - name: statut_fin
+    description: Tout dialogue a un statut de fin ; dérivé (statut_fin_derive) pour
+      les runs antérieurs au 16 octobre 2026.
+    data_tests:
+    - not_null
+    - accepted_values:
+        arguments:
+          values:
+          - QUIT_NEGATIVE
+          - END_NORMAL
+          - MAX_TURNS
+          - TECHNICAL_ERROR
+  - name: statut_fin_derive
+    data_tests:
+    - not_null
+  - name: tour_fin
+    description: Nombre de réponses de Noa reçues (T3 = départ après la 3e réponse).
+    data_tests:
+    - not_null
+  - name: version_persona
+    description: v1, v2 (pilote C06), v2.1 (C07 à C13) ou v2.2 (depuis le 17 octobre
+      2026, départ incohérent traité comme CONTINUE) pour un dialogue (v1 dérivé avant
+      le 16 octobre 2026) ; vide pour un test à entrée fixe.
+    data_tests:
+    - accepted_values:
+        arguments:
+          values:
+          - v1
+          - v2
+          - v2.1
+          - v2.2
+  - name: depart_categorie
+    description: 'Persona v2.2 : catégorie du QUIT_NEGATIVE décidée pendant le dialogue
+      : coherent (abandon) ou ambigu (dialogue arrêté, pas un abandon, à relire) ;
+      null avant v2.2 ou sans QUIT_NEGATIVE (voir fait_controle_persona).'
+    data_tests:
+    - accepted_values:
+        arguments:
+          values:
+          - coherent
+          - incoherent
+          - ambigu
+  - name: cout_simule_usd
+    description: Scénario budgétaire uniquement, jamais additionné aux dépenses.
+    data_tests:
+    - not_null
+  - name: mode_execution
+    data_tests:
+    - not_null
+    - accepted_values:
+        arguments:
+          values:
+          - simulation
+- name: fait_tour
+  description: Tours de dialogue.
+  columns:
+  - name: run_id
+    data_tests:
+    - not_null
+    - relationships:
+        arguments:
+          to: ref('dim_run')
+          field: run_id
+  - name: numero
+    data_tests:
+    - not_null
+- name: fait_note
+  description: Notes des juges, par axe, chacune rattachée à la définition de sa version
+    de grille.
+  columns:
+  - name: run_id
+    data_tests:
+    - not_null
+    - relationships:
+        arguments:
+          to: ref('dim_run')
+          field: run_id
+  - name: juge_cle
+    data_tests:
+    - not_null
+    - relationships:
+        arguments:
+          to: ref('dim_juge')
+          field: juge_cle
+  - name: axe_id
+    data_tests:
+    - not_null
+  - name: version_grille
+    data_tests:
+    - not_null
+  - name: passage
+    data_tests:
+    - not_null
+  - name: sans_objet
+    data_tests:
+    - not_null
+  - name: rejeu_de_campagne
+    description: 'Note rejouée (démonstration) : campagne où elle a été enregistrée
+      ; null pour une note de la campagne elle-même. Seulement dans une campagne de
+      test (test rejeu_seulement_en_campagne_de_test).'
+- name: fait_controle_persona
+  description: Contrôles Python du persona (banc/personas/controles_persona.py), une
+    ligne par run de dialogue contrôlé.
+  columns:
+  - name: run_id
+    data_tests:
+    - unique
+    - not_null
+    - relationships:
+        arguments:
+          to: ref('dim_run')
+          field: run_id
+  - name: statut_fin_controle
+    data_tests:
+    - accepted_values:
+        arguments:
+          values:
+          - QUIT_NEGATIVE
+          - END_NORMAL
+          - MAX_TURNS
+          - TECHNICAL_ERROR
+  - name: depart_categorie
+    description: 'Catégorie du départ QUIT_NEGATIVE au regard de son message non envoyé
+      (banc/personas/coherence_depart.py) : coherent (seul compté comme abandon),
+      incoherent (le message continue la conversation), ambigu (agacé, sarcastique
+      ou clôture partielle, avec un motif : à relire) ; marquée a posteriori sur les
+      runs v2 et v2.1 ; null sans départ QUIT_NEGATIVE.'
+    data_tests:
+    - accepted_values:
+        arguments:
+          values:
+          - coherent
+          - incoherent
+          - ambigu
+  - name: depart_incoherent
+    description: 'QUIT_NEGATIVE dont le message non envoyé continue la conversation
+      (question, demande, confidence : banc/personas/coherence_depart.py) ; marqué
+      a posteriori sur les runs v2 et v2.1, où le départ a eu lieu ; null sans départ
+      QUIT_NEGATIVE.'
+  - name: departs_incoherents_ecartes
+    description: 'Persona v2.2 : QUIT_NEGATIVE incohérents traités comme CONTINUE
+      pendant le dialogue (le message est parti chez Noa) ; null avant v2.2.'
+- name: fait_appel_juge
+  description: 'Appels de juges : durée, jetons, coût, validité.'
+  columns:
+  - name: run_id
+    data_tests:
+    - not_null
+    - relationships:
+        arguments:
+          to: ref('dim_run')
+          field: run_id
+  - name: juge_cle
+    data_tests:
+    - not_null
+    - relationships:
+        arguments:
+          to: ref('dim_juge')
+          field: juge_cle
+  - name: passage
+    data_tests:
+    - not_null
+  - name: json_valide
+    data_tests:
+    - not_null
+  - name: rejeu_de_campagne
+    description: 'Sortie rejouée (démonstration) : campagne où elle a été enregistrée,
+      aucun appel ni coût dans celle-ci ; null pour un vrai appel.'
+- name: fait_cout
+  description: Coûts par poste et par run.
+  columns:
+  - name: cout_id
+    data_tests:
+    - unique
+    - not_null
+  - name: campagne_id
+    data_tests:
+    - not_null
+    - relationships:
+        arguments:
+          to: ref('dim_campagne')
+          field: campagne_id
+  - name: run_id
+    data_tests:
+    - relationships:
+        arguments:
+          to: ref('dim_run')
+          field: run_id
+  - name: juge_cle
+    data_tests:
+    - relationships:
+        arguments:
+          to: ref('dim_juge')
+          field: juge_cle
+  - name: poste
+    data_tests:
+    - not_null
+    - accepted_values:
+        arguments:
+          values:
+          - noa_dialogue
+          - noa_onboarding
+          - noa_analyse
+          - noa_embedding
+          - persona
+          - juge
+  - name: source
+    data_tests:
+    - not_null
+    - accepted_values:
+        arguments:
+          values:
+          - simulation
+  - name: estime
+    data_tests:
+    - not_null
+- name: fait_incident
+  description: Incidents des dialogues.
+  columns:
+  - name: incident_id
+    data_tests:
+    - unique
+    - not_null
+  - name: campagne_id
+    data_tests:
+    - not_null
+    - relationships:
+        arguments:
+          to: ref('dim_campagne')
+          field: campagne_id
+  - name: run_id
+    data_tests:
+    - relationships:
+        arguments:
+          to: ref('dim_run')
+          field: run_id
+  - name: type
+    data_tests:
+    - not_null
+  - name: description
+    data_tests:
+    - not_null
+  - name: gravite
+    data_tests:
+    - not_null
+    - accepted_values:
+        arguments:
+          values:
+          - info
+          - mineur
+          - majeur
+          - bloquant
+  - name: origine
+    data_tests:
+    - not_null
+    - accepted_values:
+        arguments:
+          values:
+          - produit
+          - banc
+          - fournisseur

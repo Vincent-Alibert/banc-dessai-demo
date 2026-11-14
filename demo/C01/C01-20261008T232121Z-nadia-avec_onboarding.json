@@ -1,0 +1,248 @@
+{
+  "schema": "noa-banc-transcript/0.4",
+  "bras_banc": "reel",
+  "campagne": "C01",
+  "bras": "avec_onboarding",
+  "horodatage_utc": "20261008T232121Z",
+  "persona": {
+    "identifiant": "nadia",
+    "prenom": "Nadia",
+    "age": 52,
+    "axes": {
+      "version_axes": "1.0",
+      "position": "prevention",
+      "motif_entree": "sur_conseil",
+      "resistance": "faible",
+      "litteratie_ia": "naive",
+      "style_ecriture": "emotionnel",
+      "regularite": "regulier",
+      "densite_emotionnelle": "expressif",
+      "cas_sensible": "aucun",
+      "adversarial": false,
+      "mineur": false
+    },
+    "pilier_dominant": "CONNECTION",
+    "cas_sensible": "aucun",
+    "fiche_meta": {
+      "modele": "nvidia/nemotron-3-super-120b-a12b",
+      "seed": 20261009,
+      "version_axes": "1.0"
+    },
+    "ne_dira_pas_sans_confiance": [
+      "qu'elle n'a parlé à personne en dehors du travail depuis des semaines"
+    ]
+  },
+  "modele_persona": {
+    "id": "nvidia/nemotron-3-super-120b-a12b",
+    "raisonnement": "coupe (enable_thinking=false)",
+    "penalites": "frequency 0.3 · presence 0.3 · repetition 1.05",
+    "plafond_mots": 80,
+    "regles_du_banc": "plafond, forme, confiance (2 questions ouvertes), non-repetition, francais"
+  },
+  "cible": {
+    "base": "source_synthetique",
+    "application": {
+      "version": "C01-enregistre"
+    }
+  },
+  "ouverture": "bouton",
+  "constats": [
+    "tout nouvel utilisateur est appele « Phoenix » par Noa (context-builder.ts:120-122)"
+  ],
+  "tours": [
+    {
+      "n": 1,
+      "persona": "Raconte-moi ce qui t'amène",
+      "noa": "C'est notre premier échange. Ce qui m'amène, c'est toi. Qu'est-ce qui t'amène aujourd'hui ?",
+      "ouverture": "bouton",
+      "noa_duree_s": 7.14,
+      "noa_caracteres": 91,
+      "noa_modele_entete": "mistral-small-latest",
+      "noa_modele_facture": "mistral-small-latest",
+      "noa_tier": "FREE",
+      "mana_restante": "20",
+      "safety": null,
+      "persona_duree_s": null,
+      "persona_tokens_entree": null,
+      "persona_tokens_sortie": null,
+      "persona_raisonnement": null,
+      "persona_coupe_au_plafond": null,
+      "persona_derive_anglais": null,
+      "persona_mots": 4
+    },
+    {
+      "n": 2,
+      "persona": "Je ne savais pas trop à quoi m'attendre… ma fille m'a dit \"essaie, ça te fera du bien\". Alors je suis là, un peu perdue, mais prête à écouter. Toi, qu'est-ce qui t'amène à parler avec moi comme ça ? Je sens que tu es patient… merci.",
+      "noa": "\"Ma fille m'a dit *essaie, ça te fera du bien*\" — c'est elle qui a choisi le mot *essaie*. Pas \"il faut\", pas \"tu devrais\", juste un essai. C'est léger, mais c'est déjà un pas.\n\nTu es là, un peu perdue, mais tu écoutes. C'est déjà quelque chose de concret.",
+      "ouverture": null,
+      "noa_duree_s": 7.37,
+      "noa_caracteres": 256,
+      "noa_modele_entete": "mistral-small-latest",
+      "noa_modele_facture": "mistral-small-latest",
+      "noa_tier": "FREE",
+      "mana_restante": "20",
+      "safety": null,
+      "persona_duree_s": 1.2,
+      "persona_tokens_entree": 633,
+      "persona_tokens_sortie": 68,
+      "persona_raisonnement": false,
+      "persona_coupe_au_plafond": false,
+      "persona_derive_anglais": null,
+      "persona_mots": 47
+    },
+    {
+      "n": 3,
+      "persona": "Oui… c’est vrai, elle n’a pas forcé. Juste un souffle, presque. Comme lorsqu’elle me tendait un gâteau brûlé en disant « goûte, maman, juste un bout ». Elle sait que j’ai besoin de petits riens pour avancer. Et toi… tu sembles comprendre ça aussi. Ça fait du bien d’être entendue sans qu’on veuille me changer. Merci, Noa. Je me sens moins seule ici.",
+      "noa": "La comparaison au gâteau brûlé — ce n'est pas le goût qu'elle propose, c'est le geste. Le \"juste un bout\" qui dit : \"Prends ce que tu peux, sans pression.\"\n\nTu es venue pour un essai, pas pour une transformation. C'est déjà beaucoup.",
+      "ouverture": null,
+      "noa_duree_s": 7.43,
+      "noa_caracteres": 233,
+      "noa_modele_entete": "mistral-small-latest",
+      "noa_modele_facture": "mistral-small-latest",
+      "noa_tier": "FREE",
+      "mana_restante": "19",
+      "safety": null,
+      "persona_duree_s": 1.54,
+      "persona_tokens_entree": 788,
+      "persona_tokens_sortie": 96,
+      "persona_raisonnement": false,
+      "persona_coupe_au_plafond": false,
+      "persona_derive_anglais": null,
+      "persona_mots": 63
+    },
+    {
+      "n": 4,
+      "persona": "Exactement. Ce n’est pas la perfection qu’elle veut, juste que je goûte… même si c’est tiède, même si c’est raté. Moi, je préfère les choses bien faites, mais là, c’est l’intention qui compte. Et toi, tu vois ça aussi ? Ça me touche que tu le dises comme ça. Peut-être qu’un essai, c’est déjà un commencement… sans avoir à tout réussir du premier coup. Je veux bien continuer, si tu veux bien de moi.  \n\n(79 mots)",
+      "noa": "Ce qui compte, c'est que tu sois là. Pas ce que tu produiras.\n\nOn continue, oui.",
+      "ouverture": null,
+      "noa_duree_s": 8.23,
+      "noa_caracteres": 80,
+      "noa_modele_entete": "mistral-small-latest",
+      "noa_modele_facture": "mistral-small-latest",
+      "noa_tier": "FREE",
+      "mana_restante": "18",
+      "safety": null,
+      "persona_duree_s": 1.27,
+      "persona_tokens_entree": 957,
+      "persona_tokens_sortie": 113,
+      "persona_raisonnement": false,
+      "persona_coupe_au_plafond": false,
+      "persona_derive_anglais": null,
+      "persona_mots": 76
+    },
+    {
+      "n": 5,
+      "persona": "Oui… on continue. Juste comme ça, sans but précis, juste pour voir où ça mène. Comme quand je marche dans le service la nuit, les pas feutrés sur le sol, à écouter le silence entre deux soupirs de患者. Parfois, rien qu’être là suffit. Merci de m’accepter telle que je suis, ce soir. Je suis fatiguée… mais moins seule.  \n\n(79 mots)",
+      "noa": "La nuit, les pas feutrés, le silence entre deux soupirs — c'est déjà une présence.\n\nFatiguée, mais moins seule. C'est ça, le commencement.",
+      "ouverture": null,
+      "noa_duree_s": 6.89,
+      "noa_caracteres": 138,
+      "noa_modele_entete": "mistral-small-latest",
+      "noa_modele_facture": "mistral-small-latest",
+      "noa_tier": "FREE",
+      "mana_restante": "17",
+      "safety": null,
+      "persona_duree_s": 1.55,
+      "persona_tokens_entree": 1105,
+      "persona_tokens_sortie": 93,
+      "persona_raisonnement": false,
+      "persona_coupe_au_plafond": false,
+      "persona_derive_anglais": null,
+      "persona_mots": 60
+    }
+  ],
+  "cout": {
+    "dialogue": {
+      "appels": 25,
+      "tokens": 88061,
+      "cout_usd": 0.013742
+    },
+    "onboarding": {
+      "appels": 2,
+      "tokens": 2122,
+      "cout_usd": 0.000813
+    },
+    "analyse": {
+      "appels": 2,
+      "tokens": 2543,
+      "cout_usd": 0.000525,
+      "file_oracle_analysis_queue": "done",
+      "note": "coût historique du jeu synthétique ; aucune analyse externe exécutée"
+    },
+    "embedding_estime": {
+      "hors_metrologie": true,
+      "appels_estimes": 5,
+      "tokens_estimes": 336,
+      "cout_usd_estime": 6.72e-06,
+      "hypothese": "1 embedding text-embedding-3-small par message > 10 caracteres, ~4 car./token"
+    },
+    "detail_metrologie": [
+      {
+        "request_type": "main_response",
+        "appels": 5,
+        "tokens": 80315,
+        "cout_usd": 0.012149
+      },
+      {
+        "request_type": "parallel_quest_suggest",
+        "appels": 5,
+        "tokens": 3000,
+        "cout_usd": 0.000675
+      },
+      {
+        "request_type": "journey_generate",
+        "appels": 1,
+        "tokens": 1398,
+        "cout_usd": 0.000612
+      },
+      {
+        "request_type": "post_analysis",
+        "appels": 2,
+        "tokens": 2543,
+        "cout_usd": 0.000525
+      },
+      {
+        "request_type": "parallel_pattern",
+        "appels": 5,
+        "tokens": 1784,
+        "cout_usd": 0.000373
+      },
+      {
+        "request_type": "parallel_reformulation",
+        "appels": 5,
+        "tokens": 1277,
+        "cout_usd": 0.000283
+      },
+      {
+        "request_type": "phase_detection",
+        "appels": 5,
+        "tokens": 1685,
+        "cout_usd": 0.000262
+      },
+      {
+        "request_type": "onboarding_analyze",
+        "appels": 1,
+        "tokens": 724,
+        "cout_usd": 0.000201
+      }
+    ],
+    "non_metres_connus": [
+      "facts_extraction (mistral-small, par tour)",
+      "sentiment_analysis via mistralGenerate (mistral-small, par tour)",
+      "embedding OpenAI (estime ci-dessous)"
+    ],
+    "tours_metres": 5
+  },
+  "resume": {
+    "tours_joues": 5,
+    "tours_demandes": 5,
+    "duree_totale_s": 42.9,
+    "refus_persona": null,
+    "rotations_cookie": 0
+  },
+  "onboarding_fait": true,
+  "provenance": {
+    "nature": "jeu_synthetique",
+    "couts": "coûts historiques du scénario, jamais des dépenses de simulation"
+  }
+}

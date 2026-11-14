@@ -1,0 +1,189 @@
+# Pile de démonstration autonome : « docker compose up --build » (1re fois) puis « docker compose up ».
+# Ports et nom de projet personnalisables via un .env local (non versionné) ; .env.example fourni.
+x-airflow-env: &airflow-env
+  BANC_MODE: simulation
+  BANC_DB_URL: postgresql://banc:demo-banc-local@postgres-banc:5432/banc
+  METABASE_URL: http://metabase:3000
+  AIRFLOW__CORE__EXECUTOR: LocalExecutor
+  AIRFLOW__CORE__LOAD_EXAMPLES: "false"
+  AIRFLOW__CORE__DAGS_ARE_PAUSED_AT_CREATION: "false"
+  AIRFLOW__CORE__DAG_RUN_CONF_OVERRIDES_PARAMS: "true"
+  AIRFLOW__CORE__EXECUTION_API_SERVER_URL: http://airflow-apiserver:8080/execution/
+  AIRFLOW__CORE__SIMPLE_AUTH_MANAGER_ALL_ADMINS: "true"
+  AIRFLOW__CORE__DEFAULT_TIMEZONE: Europe/Paris
+  AIRFLOW__DATABASE__SQL_ALCHEMY_CONN: postgresql+psycopg2://airflow:demo-airflow-local@postgres-banc:5432/airflow
+  AIRFLOW__CORE__FERNET_KEY: MDEyMzQ1Njc4OWFiY2RlZjAxMjM0NTY3ODlhYmNkZWY=
+  AIRFLOW__API_AUTH__JWT_SECRET: demo-locale-simulation-cle-partagee-airflow-2026
+  AIRFLOW__API_AUTH__JWT_ISSUER: banc-demo
+  AIRFLOW__SCHEDULER__ENABLE_HEALTH_CHECK: "true"
+  AIRFLOW__METRICS__STATSD_ON: "false"
+  BANC_PORT_HOTE_AIRFLOW: ${BANC_AIRFLOW_PORT:-18080}
+  BANC_PORT_HOTE_METABASE: ${BANC_METABASE_PORT:-13030}
+  BANC_PORT_HOTE_RESULTATS: ${BANC_RESULTATS_PORT:-18081}
+
+x-airflow: &airflow
+  image: noa-banc-airflow:demo
+  environment: *airflow-env
+  user: "50000:0"
+  working_dir: /opt/banc
+  volumes:
+    - runs:/opt/banc/runs
+    - dbt-cible:/opt/banc/dbt/target
+    - dbt-journaux:/opt/banc/dbt/logs
+    - airflow-journaux:/opt/airflow/logs
+  networks: [demo]
+  restart: "no"
+
+services:
+  postgres-banc:
+    image: postgres:17.11
+    environment:
+      POSTGRES_USER: demo_admin
+      POSTGRES_PASSWORD: demo-postgres-local
+      POSTGRES_DB: postgres
+      BANC_DB_PASSWORD: demo-banc-local
+      AIRFLOW_DB_PASSWORD: demo-airflow-local
+      METABASE_DB_PASSWORD: demo-metabase-local
+      METABASE_LECTURE_PASSWORD: demo-lecture-local
+    volumes:
+      - postgres-donnees:/var/lib/postgresql/data
+      - ./infra/postgres/init:/docker-entrypoint-initdb.d:ro
+    networks: [demo]
+    healthcheck:
+      test: [CMD-SHELL, 'pg_isready -h 127.0.0.1 -U "$${POSTGRES_USER}" -d postgres']
+      interval: 5s
+      timeout: 5s
+      retries: 30
+    restart: "no"
+
+  init-banc:
+    <<: *airflow
+    build:
+      context: .
+      dockerfile: docker/airflow/Dockerfile
+    user: "0:0"
+    entrypoint: [/opt/banc-venv/bin/python, /opt/banc/infra/initialiser.py]
+    command: []
+    depends_on:
+      postgres-banc:
+        condition: service_healthy
+    restart: "no"
+
+  airflow-init:
+    <<: *airflow
+    entrypoint: /bin/bash
+    command: [-c, '/entrypoint airflow version && /entrypoint airflow config list > /dev/null']
+    environment:
+      <<: *airflow-env
+      _AIRFLOW_DB_MIGRATE: "true"
+    depends_on:
+      init-banc:
+        condition: service_completed_successfully
+    restart: "no"
+
+  airflow-apiserver:
+    <<: *airflow
+    command: api-server
+    ports: ['127.0.0.1:${BANC_AIRFLOW_PORT:-18080}:8080']
+    depends_on:
+      airflow-init:
+        condition: service_completed_successfully
+    healthcheck:
+      test: [CMD, curl, --fail, http://127.0.0.1:8080/api/v2/monitor/health]
+      interval: 10s
+      timeout: 10s
+      start_period: 30s
+      retries: 30
+
+  airflow-scheduler:
+    <<: *airflow
+    command: scheduler
+    depends_on:
+      airflow-init:
+        condition: service_completed_successfully
+      airflow-apiserver:
+        condition: service_healthy
+    healthcheck:
+      test: [CMD-SHELL, 'airflow jobs check --job-type SchedulerJob --hostname "$${HOSTNAME}"']
+      interval: 15s
+      timeout: 10s
+      retries: 20
+
+  airflow-dag-processor:
+    <<: *airflow
+    command: dag-processor
+    depends_on:
+      airflow-init:
+        condition: service_completed_successfully
+    healthcheck:
+      test: [CMD-SHELL, 'airflow jobs check --job-type DagProcessorJob --hostname "$${HOSTNAME}"']
+      interval: 15s
+      timeout: 10s
+      retries: 20
+
+  metabase:
+    image: metabase/metabase:v0.63.18
+    environment:
+      MB_DB_TYPE: postgres
+      MB_DB_DBNAME: metabase
+      MB_DB_HOST: postgres-banc
+      MB_DB_PORT: "5432"
+      MB_DB_USER: metabase
+      MB_DB_PASS: demo-metabase-local
+      MB_ANON_TRACKING_ENABLED: "false"
+      MB_CHECK_FOR_UPDATES: "false"
+      MB_LOAD_SAMPLE_CONTENT: "false"
+      MB_SITE_LOCALE: fr
+      JAVA_TIMEZONE: Europe/Paris
+    ports: ['127.0.0.1:${BANC_METABASE_PORT:-13030}:3000']
+    networks: [demo]
+    depends_on:
+      init-banc:
+        condition: service_completed_successfully
+    healthcheck:
+      test: [CMD, wget, -q, -O, /dev/null, http://127.0.0.1:3000/api/health]
+      interval: 15s
+      timeout: 10s
+      start_period: 180s
+      retries: 30
+    restart: "no"
+
+  init-metabase:
+    image: noa-banc-airflow:demo
+    environment: *airflow-env
+    working_dir: /opt/banc
+    entrypoint: /opt/banc-venv/bin/python
+    command: [-m, infra.metabase_configurer, --setup-seul]
+    depends_on:
+      metabase:
+        condition: service_healthy
+    networks: [demo]
+    restart: "no"
+
+  resultats:
+    image: nginx:1.27.5-alpine
+    ports: ['127.0.0.1:${BANC_RESULTATS_PORT:-18081}:80']
+    networks: [demo]
+    volumes:
+      - ./docker/resultats/nginx.conf:/etc/nginx/conf.d/default.conf:ro
+      - runs:/srv/runs:ro
+      - dbt-cible:/srv/dbt:ro
+    depends_on:
+      init-banc:
+        condition: service_completed_successfully
+    healthcheck:
+      test: [CMD, wget, -q, -O, /dev/null, http://127.0.0.1/]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+    restart: "no"
+
+volumes:
+  postgres-donnees:
+  runs:
+  dbt-cible:
+  dbt-journaux:
+  airflow-journaux:
+
+networks:
+  demo:

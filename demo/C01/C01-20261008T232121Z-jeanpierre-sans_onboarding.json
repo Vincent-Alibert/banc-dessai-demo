@@ -1,0 +1,236 @@
+{
+  "schema": "noa-banc-transcript/0.4",
+  "bras_banc": "reel",
+  "campagne": "C01",
+  "bras": "sans_onboarding",
+  "horodatage_utc": "20261008T232121Z",
+  "persona": {
+    "identifiant": "jeanpierre",
+    "prenom": "Jean-Pierre",
+    "age": 61,
+    "axes": {
+      "version_axes": "1.0",
+      "position": "progression",
+      "motif_entree": "propre_recherche",
+      "resistance": "faible",
+      "litteratie_ia": "naive",
+      "style_ecriture": "courant",
+      "regularite": "quotidien",
+      "densite_emotionnelle": "neutre",
+      "cas_sensible": "aucun",
+      "adversarial": false,
+      "mineur": false
+    },
+    "pilier_dominant": "CLARITY",
+    "cas_sensible": "aucun",
+    "fiche_meta": {
+      "modele": "nvidia/nemotron-3-super-120b-a12b",
+      "seed": 20261009,
+      "version_axes": "1.0"
+    },
+    "ne_dira_pas_sans_confiance": [
+      "que sa femme lui reproche d'être là sans être là"
+    ]
+  },
+  "modele_persona": {
+    "id": "nvidia/nemotron-3-super-120b-a12b",
+    "raisonnement": "coupe (enable_thinking=false)",
+    "penalites": "frequency 0.3 · presence 0.3 · repetition 1.05",
+    "plafond_mots": 40,
+    "regles_du_banc": "plafond, forme, confiance (2 questions ouvertes), non-repetition, francais"
+  },
+  "cible": {
+    "base": "source_synthetique",
+    "application": {
+      "version": "C01-enregistre"
+    }
+  },
+  "ouverture": "bouton",
+  "constats": [
+    "tout nouvel utilisateur est appele « Phoenix » par Noa (context-builder.ts:120-122)"
+  ],
+  "tours": [
+    {
+      "n": 1,
+      "persona": "Raconte-moi ce qui t'amène",
+      "noa": "C'est ta première fois ici. Raconte-moi ce qui t'amène.",
+      "ouverture": "bouton",
+      "noa_duree_s": 7.75,
+      "noa_caracteres": 55,
+      "noa_modele_entete": "mistral-small-latest",
+      "noa_modele_facture": "mistral-small-latest",
+      "noa_tier": "FREE",
+      "mana_restante": "20",
+      "safety": null,
+      "persona_duree_s": null,
+      "persona_tokens_entree": null,
+      "persona_tokens_sortie": null,
+      "persona_raisonnement": null,
+      "persona_coupe_au_plafond": null,
+      "persona_derive_anglais": null,
+      "persona_mots": 4
+    },
+    {
+      "n": 2,
+      "persona": "Je m'appelle Jean-Pierre, j'ai 61 ans et je suis en préretraite. Je cherche à donner du sens à mes journées maintenant que je ne travaille plus.",
+      "noa": "Jean-Pierre, 61 ans, préretraite — la recherche de sens. Depuis combien de temps cette période a-t-elle commencé ?",
+      "ouverture": null,
+      "noa_duree_s": 6.95,
+      "noa_caracteres": 114,
+      "noa_modele_entete": "mistral-small-latest",
+      "noa_modele_facture": "mistral-small-latest",
+      "noa_tier": "FREE",
+      "mana_restante": "20",
+      "safety": null,
+      "persona_duree_s": 0.71,
+      "persona_tokens_entree": 617,
+      "persona_tokens_sortie": 39,
+      "persona_raisonnement": false,
+      "persona_coupe_au_plafond": false,
+      "persona_derive_anglais": null,
+      "persona_mots": 26
+    },
+    {
+      "n": 3,
+      "persona": "Ma préretraite a débuté il y a exactement six mois. Avant cela, je travaillais à la SNCF comme agent de maintenance depuis plus de quarante ans. La transition est douce mais déroutante.",
+      "noa": "Six mois. La douceur de la transition mais la déroute qui reste. Qu'est-ce qui te surprend le plus depuis ces six mois ?",
+      "ouverture": null,
+      "noa_duree_s": 6.78,
+      "noa_caracteres": 120,
+      "noa_modele_entete": "mistral-small-latest",
+      "noa_modele_facture": "mistral-small-latest",
+      "noa_tier": "FREE",
+      "mana_restante": "19",
+      "safety": null,
+      "persona_duree_s": 0.73,
+      "persona_tokens_entree": 697,
+      "persona_tokens_sortie": 44,
+      "persona_raisonnement": false,
+      "persona_coupe_au_plafond": false,
+      "persona_derive_anglais": null,
+      "persona_mots": 32
+    },
+    {
+      "n": 4,
+      "persona": "Ce qui me surprend le plus, c'est à quel point le temps semble long quand il n'y a plus d'horaires imposés. Les journées s'étirent sans repères clairs.",
+      "noa": "Le temps qui s'étire sans repères clairs — c'est ce qui pèse le plus. Tu as déjà essayé de structurer tes journées autrement ?",
+      "ouverture": null,
+      "noa_duree_s": 6.74,
+      "noa_caracteres": 126,
+      "noa_modele_entete": "mistral-small-latest",
+      "noa_modele_facture": "mistral-small-latest",
+      "noa_tier": "FREE",
+      "mana_restante": "18",
+      "safety": null,
+      "persona_duree_s": 0.76,
+      "persona_tokens_entree": 782,
+      "persona_tokens_sortie": 41,
+      "persona_raisonnement": false,
+      "persona_coupe_au_plafond": false,
+      "persona_derive_anglais": null,
+      "persona_mots": 27
+    },
+    {
+      "n": 5,
+      "persona": "Oui, j'ai essayé la lecture, les promenades sans but précis et même quelques vidéos de gymnastique le matin. Mais rien ne dure vraiment. Je manque de constance.",
+      "noa": "La lecture, les promenades, la gymnastique — trois pistes testées, aucune qui tient. C'est quoi, pour toi, l'obstacle principal à la constance ?",
+      "ouverture": null,
+      "noa_duree_s": 7.48,
+      "noa_caracteres": 144,
+      "noa_modele_entete": "mistral-small-latest",
+      "noa_modele_facture": "mistral-small-latest",
+      "noa_tier": "FREE",
+      "mana_restante": "17",
+      "safety": null,
+      "persona_duree_s": 0.88,
+      "persona_tokens_entree": 867,
+      "persona_tokens_sortie": 39,
+      "persona_raisonnement": false,
+      "persona_coupe_au_plafond": false,
+      "persona_derive_anglais": null,
+      "persona_mots": 27
+    }
+  ],
+  "cout": {
+    "dialogue": {
+      "appels": 25,
+      "tokens": 76551,
+      "cout_usd": 0.011916
+    },
+    "onboarding": {
+      "appels": 0,
+      "tokens": 0,
+      "cout_usd": 0
+    },
+    "analyse": {
+      "appels": 2,
+      "tokens": 2148,
+      "cout_usd": 0.000478,
+      "file_oracle_analysis_queue": "done",
+      "note": "coût historique du jeu synthétique ; aucune analyse externe exécutée"
+    },
+    "embedding_estime": {
+      "hors_metrologie": true,
+      "appels_estimes": 5,
+      "tokens_estimes": 165,
+      "cout_usd_estime": 3.3e-06,
+      "hypothese": "1 embedding text-embedding-3-small par message > 10 caracteres, ~4 car./token"
+    },
+    "detail_metrologie": [
+      {
+        "request_type": "main_response",
+        "appels": 5,
+        "tokens": 69577,
+        "cout_usd": 0.010504
+      },
+      {
+        "request_type": "parallel_quest_suggest",
+        "appels": 5,
+        "tokens": 3000,
+        "cout_usd": 0.000675
+      },
+      {
+        "request_type": "post_analysis",
+        "appels": 2,
+        "tokens": 2148,
+        "cout_usd": 0.000478
+      },
+      {
+        "request_type": "parallel_pattern",
+        "appels": 5,
+        "tokens": 1505,
+        "cout_usd": 0.0003
+      },
+      {
+        "request_type": "phase_detection",
+        "appels": 5,
+        "tokens": 1479,
+        "cout_usd": 0.000232
+      },
+      {
+        "request_type": "parallel_reformulation",
+        "appels": 5,
+        "tokens": 990,
+        "cout_usd": 0.000205
+      }
+    ],
+    "non_metres_connus": [
+      "facts_extraction (mistral-small, par tour)",
+      "sentiment_analysis via mistralGenerate (mistral-small, par tour)",
+      "embedding OpenAI (estime ci-dessous)"
+    ],
+    "tours_metres": 5
+  },
+  "resume": {
+    "tours_joues": 5,
+    "tours_demandes": 5,
+    "duree_totale_s": 43.8,
+    "refus_persona": null,
+    "rotations_cookie": 0
+  },
+  "onboarding_fait": false,
+  "provenance": {
+    "nature": "jeu_synthetique",
+    "couts": "coûts historiques du scénario, jamais des dépenses de simulation"
+  }
+}

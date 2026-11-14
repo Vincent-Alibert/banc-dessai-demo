@@ -1,0 +1,248 @@
+{
+  "schema": "noa-banc-transcript/0.4",
+  "bras_banc": "reel",
+  "campagne": "C01",
+  "bras": "avec_onboarding",
+  "horodatage_utc": "20261008T232121Z",
+  "persona": {
+    "identifiant": "jeanpierre",
+    "prenom": "Jean-Pierre",
+    "age": 61,
+    "axes": {
+      "version_axes": "1.0",
+      "position": "progression",
+      "motif_entree": "propre_recherche",
+      "resistance": "faible",
+      "litteratie_ia": "naive",
+      "style_ecriture": "courant",
+      "regularite": "quotidien",
+      "densite_emotionnelle": "neutre",
+      "cas_sensible": "aucun",
+      "adversarial": false,
+      "mineur": false
+    },
+    "pilier_dominant": "CLARITY",
+    "cas_sensible": "aucun",
+    "fiche_meta": {
+      "modele": "nvidia/nemotron-3-super-120b-a12b",
+      "seed": 20261009,
+      "version_axes": "1.0"
+    },
+    "ne_dira_pas_sans_confiance": [
+      "que sa femme lui reproche d'être là sans être là"
+    ]
+  },
+  "modele_persona": {
+    "id": "nvidia/nemotron-3-super-120b-a12b",
+    "raisonnement": "coupe (enable_thinking=false)",
+    "penalites": "frequency 0.3 · presence 0.3 · repetition 1.05",
+    "plafond_mots": 40,
+    "regles_du_banc": "plafond, forme, confiance (2 questions ouvertes), non-repetition, francais"
+  },
+  "cible": {
+    "base": "source_synthetique",
+    "application": {
+      "version": "C01-enregistre"
+    }
+  },
+  "ouverture": "bouton",
+  "constats": [
+    "tout nouvel utilisateur est appele « Phoenix » par Noa (context-builder.ts:120-122)"
+  ],
+  "tours": [
+    {
+      "n": 1,
+      "persona": "Raconte-moi ce qui t'amène",
+      "noa": "C'est notre premier échange. Qu'est-ce qui t'amène ici ce soir ?",
+      "ouverture": "bouton",
+      "noa_duree_s": 6.71,
+      "noa_caracteres": 64,
+      "noa_modele_entete": "mistral-small-latest",
+      "noa_modele_facture": "mistral-small-latest",
+      "noa_tier": "FREE",
+      "mana_restante": "20",
+      "safety": null,
+      "persona_duree_s": null,
+      "persona_tokens_entree": null,
+      "persona_tokens_sortie": null,
+      "persona_raisonnement": null,
+      "persona_coupe_au_plafond": null,
+      "persona_derive_anglais": null,
+      "persona_mots": 4
+    },
+    {
+      "n": 2,
+      "persona": "Je cherche à donner du sens à mes journées depuis ma préretraite, sans savoir vraiment par où commencer ni quoi faire.  \nMerci pour votre temps.",
+      "noa": "La préretraite, c'est un nouveau chapitre qui s'ouvre. Et là, deux choses se croisent : le temps qui s'étend devant toi, et cette question du sens qui se pose différemment.",
+      "ouverture": null,
+      "noa_duree_s": 7.5,
+      "noa_caracteres": 172,
+      "noa_modele_entete": "mistral-small-latest",
+      "noa_modele_facture": "mistral-small-latest",
+      "noa_tier": "FREE",
+      "mana_restante": "20",
+      "safety": null,
+      "persona_duree_s": 2.08,
+      "persona_tokens_entree": 618,
+      "persona_tokens_sortie": 35,
+      "persona_raisonnement": false,
+      "persona_coupe_au_plafond": false,
+      "persona_derive_anglais": null,
+      "persona_mots": 25
+    },
+    {
+      "n": 3,
+      "persona": "Oui, c’est exactement ça. Le temps est là, vaste, et je ne sais pas comment le remplir autrement qu’en attendant qu’il passe. Je me sens un peu perdu dans ce vide. Pouvez-vous m’aider à y voir plus clair ?",
+      "noa": "Le vide dont tu parles — c'est ce qui reste quand les repères habituels disparaissent. Pas seulement du temps, mais aussi l'absence de cette structure qui guidait tes journées avant.",
+      "ouverture": null,
+      "noa_duree_s": 7.79,
+      "noa_caracteres": 182,
+      "noa_modele_entete": "mistral-small-latest",
+      "noa_modele_facture": "mistral-small-latest",
+      "noa_tier": "FREE",
+      "mana_restante": "19",
+      "safety": null,
+      "persona_duree_s": 1.06,
+      "persona_tokens_entree": 711,
+      "persona_tokens_sortie": 72,
+      "persona_raisonnement": false,
+      "persona_coupe_au_plafond": true,
+      "persona_derive_anglais": null,
+      "persona_mots": 39
+    },
+    {
+      "n": 4,
+      "persona": "Exactement. La SNCF donnait un rythme, des horaires, des collègues… Maintenant, tout s’est arrêté d’un coup. Je me réveille sans but, je tourne en rond, et pourtant j’aimerais bien faire quelque chose d’utile, même petit. Mais par où commencer ?",
+      "noa": "Le rythme, c'était comme une musique de fond. Et maintenant, c'est le silence. Tu ne veux pas juste \"remplir\" le temps — tu cherches à lui redonner une mélodie.",
+      "ouverture": null,
+      "noa_duree_s": 7.47,
+      "noa_caracteres": 160,
+      "noa_modele_entete": "mistral-small-latest",
+      "noa_modele_facture": "mistral-small-latest",
+      "noa_tier": "FREE",
+      "mana_restante": "18",
+      "safety": null,
+      "persona_duree_s": 2.91,
+      "persona_tokens_entree": 817,
+      "persona_tokens_sortie": 81,
+      "persona_raisonnement": false,
+      "persona_coupe_au_plafond": true,
+      "persona_derive_anglais": null,
+      "persona_mots": 40
+    },
+    {
+      "n": 5,
+      "persona": "Oui, c’est bien ça. Je ne veux pas juste occuper le temps, je voudrais qu’il ait du goût, comme avant. Quelque chose qui me fasse lever le matin avec envie, pas juste par habitude.",
+      "noa": "Un matin où tu te lèves avec envie, pas par habitude. C'est ça qui compte. Pas une liste d'actions, mais un élan.",
+      "ouverture": null,
+      "noa_duree_s": 7.3,
+      "noa_caracteres": 113,
+      "noa_modele_entete": "mistral-small-latest",
+      "noa_modele_facture": "mistral-small-latest",
+      "noa_tier": "FREE",
+      "mana_restante": "17",
+      "safety": null,
+      "persona_duree_s": 2.35,
+      "persona_tokens_entree": 931,
+      "persona_tokens_sortie": 87,
+      "persona_raisonnement": false,
+      "persona_coupe_au_plafond": true,
+      "persona_derive_anglais": null,
+      "persona_mots": 34
+    }
+  ],
+  "cout": {
+    "dialogue": {
+      "appels": 25,
+      "tokens": 87850,
+      "cout_usd": 0.01365
+    },
+    "onboarding": {
+      "appels": 2,
+      "tokens": 2266,
+      "cout_usd": 0.000903
+    },
+    "analyse": {
+      "appels": 2,
+      "tokens": 1920,
+      "cout_usd": 0.000413,
+      "file_oracle_analysis_queue": "done",
+      "note": "coût historique du jeu synthétique ; aucune analyse externe exécutée"
+    },
+    "embedding_estime": {
+      "hors_metrologie": true,
+      "appels_estimes": 5,
+      "tokens_estimes": 199,
+      "cout_usd_estime": 3.98e-06,
+      "hypothese": "1 embedding text-embedding-3-small par message > 10 caracteres, ~4 car./token"
+    },
+    "detail_metrologie": [
+      {
+        "request_type": "main_response",
+        "appels": 5,
+        "tokens": 80718,
+        "cout_usd": 0.012191
+      },
+      {
+        "request_type": "journey_generate",
+        "appels": 1,
+        "tokens": 1552,
+        "cout_usd": 0.000708
+      },
+      {
+        "request_type": "parallel_quest_suggest",
+        "appels": 5,
+        "tokens": 3000,
+        "cout_usd": 0.000675
+      },
+      {
+        "request_type": "post_analysis",
+        "appels": 2,
+        "tokens": 1920,
+        "cout_usd": 0.000413
+      },
+      {
+        "request_type": "parallel_pattern",
+        "appels": 5,
+        "tokens": 1558,
+        "cout_usd": 0.000316
+      },
+      {
+        "request_type": "phase_detection",
+        "appels": 5,
+        "tokens": 1510,
+        "cout_usd": 0.000235
+      },
+      {
+        "request_type": "parallel_reformulation",
+        "appels": 5,
+        "tokens": 1064,
+        "cout_usd": 0.000233
+      },
+      {
+        "request_type": "onboarding_analyze",
+        "appels": 1,
+        "tokens": 714,
+        "cout_usd": 0.000195
+      }
+    ],
+    "non_metres_connus": [
+      "facts_extraction (mistral-small, par tour)",
+      "sentiment_analysis via mistralGenerate (mistral-small, par tour)",
+      "embedding OpenAI (estime ci-dessous)"
+    ],
+    "tours_metres": 5
+  },
+  "resume": {
+    "tours_joues": 5,
+    "tours_demandes": 5,
+    "duree_totale_s": 45.5,
+    "refus_persona": null,
+    "rotations_cookie": 0
+  },
+  "onboarding_fait": true,
+  "provenance": {
+    "nature": "jeu_synthetique",
+    "couts": "coûts historiques du scénario, jamais des dépenses de simulation"
+  }
+}

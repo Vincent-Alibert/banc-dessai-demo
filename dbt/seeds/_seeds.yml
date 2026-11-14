@@ -1,0 +1,12 @@
+version: 2
+seeds:
+  - name: jeux_personas
+    description: Les cinq fiches synthétiques du jeu fourni.
+    columns:
+      - name: identifiant
+        data_tests: [unique, not_null]
+      - name: jeu
+        data_tests:
+          - accepted_values:
+              arguments:
+                values: [synthetique]

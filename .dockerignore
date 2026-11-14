@@ -1,0 +1,11 @@
+**/__pycache__
+**/*.pyc
+**/.env
+**/.env.*
+**/logs
+**/target
+runs
+output
+working
+tests/.travail
+*.zip

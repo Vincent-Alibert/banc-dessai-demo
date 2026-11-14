@@ -1,0 +1,33 @@
+# Caches Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+env/
+venv/
+.venv/
+
+# Environnement et secrets
+.env
+.env.*
+!.env.example
+
+# IDEs et éditeurs
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+.DS_Store
+
+# Données runtime et logs
+runs/*
+!runs/.gitkeep
+dbt/target/
+dbt/logs/
+logs/
+*.log
+
+# Fichiers temporaires tests
+tests/.travail/

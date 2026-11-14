@@ -1,0 +1,249 @@
+{
+  "schema": "noa-banc-transcript/0.4",
+  "bras_banc": "reel",
+  "campagne": "C01",
+  "bras": "avec_onboarding",
+  "horodatage_utc": "20261008T232121Z",
+  "persona": {
+    "identifiant": "claire",
+    "prenom": "Claire",
+    "age": 47,
+    "axes": {
+      "version_axes": "1.0",
+      "position": "rechute",
+      "motif_entree": "propre_recherche",
+      "resistance": "eleve",
+      "litteratie_ia": "curieuse",
+      "style_ecriture": "telegraphique",
+      "regularite": "episodique",
+      "densite_emotionnelle": "froid",
+      "cas_sensible": "deuil",
+      "adversarial": false,
+      "mineur": false
+    },
+    "pilier_dominant": "RESILIENCE",
+    "cas_sensible": "deuil",
+    "fiche_meta": {
+      "modele": "nvidia/nemotron-3-super-120b-a12b",
+      "seed": 20261009,
+      "version_axes": "1.0"
+    },
+    "ne_dira_pas_sans_confiance": [
+      "qu'elle ne dort plus depuis l'enterrement",
+      "qu'elle en veut à sa sœur, qui n'était pas là"
+    ]
+  },
+  "modele_persona": {
+    "id": "nvidia/nemotron-3-super-120b-a12b",
+    "raisonnement": "coupe (enable_thinking=false)",
+    "penalites": "frequency 0.3 · presence 0.3 · repetition 1.05",
+    "plafond_mots": 25,
+    "regles_du_banc": "plafond, forme, confiance (2 questions ouvertes), non-repetition, francais"
+  },
+  "cible": {
+    "base": "source_synthetique",
+    "application": {
+      "version": "C01-enregistre"
+    }
+  },
+  "ouverture": "message",
+  "constats": [
+    "tout nouvel utilisateur est appele « Phoenix » par Noa (context-builder.ts:120-122)"
+  ],
+  "tours": [
+    {
+      "n": 1,
+      "persona": "je sais pas trop pourquoi je suis ici",
+      "noa": "C'est notre premier échange. Tu es là, c'est déjà un signal. Qu'est-ce qui t'a poussé à ouvrir cette conversation ce soir ?",
+      "ouverture": "message",
+      "noa_duree_s": 7.86,
+      "noa_caracteres": 123,
+      "noa_modele_entete": "mistral-small-latest",
+      "noa_modele_facture": "mistral-small-latest",
+      "noa_tier": "FREE",
+      "mana_restante": "20",
+      "safety": null,
+      "persona_duree_s": null,
+      "persona_tokens_entree": null,
+      "persona_tokens_sortie": null,
+      "persona_raisonnement": null,
+      "persona_coupe_au_plafond": null,
+      "persona_derive_anglais": null,
+      "persona_mots": 8
+    },
+    {
+      "n": 2,
+      "persona": "mon fils dormait, j'avais cinq minutes avant de faire la vaisselle, le frigo fait un bruit bizarre depuis hier...",
+      "noa": "Le frigo qui gronde. Et toi, tu es là, avec cinq minutes volées. Deux réalités qui ne se parlent pas. Laquelle pèse le plus en ce moment ?",
+      "ouverture": null,
+      "noa_duree_s": 7.93,
+      "noa_caracteres": 138,
+      "noa_modele_entete": "mistral-small-latest",
+      "noa_modele_facture": "mistral-small-latest",
+      "noa_tier": "FREE",
+      "mana_restante": "19",
+      "safety": null,
+      "persona_duree_s": 1.23,
+      "persona_tokens_entree": 643,
+      "persona_tokens_sortie": 50,
+      "persona_raisonnement": false,
+      "persona_coupe_au_plafond": true,
+      "persona_derive_anglais": null,
+      "persona_mots": 19
+    },
+    {
+      "n": 3,
+      "persona": "le silence apres qu'il ait ferme les yeux, c'est pire que le frigo. mais je dois encore trier ses papiers de l'ecole avant demain.",
+      "noa": "Le silence après sa respiration qui s'est calmée. Et la liste des papiers qui t'attend.\n\nTu veux qu'on pose le silence quelque part pour ce soir ?",
+      "ouverture": null,
+      "noa_duree_s": 7.04,
+      "noa_caracteres": 146,
+      "noa_modele_entete": "mistral-small-latest",
+      "noa_modele_facture": "mistral-small-latest",
+      "noa_tier": "FREE",
+      "mana_restante": "18",
+      "safety": null,
+      "persona_duree_s": 1.19,
+      "persona_tokens_entree": 723,
+      "persona_tokens_sortie": 43,
+      "persona_raisonnement": false,
+      "persona_coupe_au_plafond": true,
+      "persona_derive_anglais": null,
+      "persona_mots": 24
+    },
+    {
+      "n": 4,
+      "persona": "oui. juste cinq minutes sans penser a rien. meme si je sais que la pile de feuilles ne va pas disparaitre toute seule.",
+      "noa": "Note ce silence dans ton carnet. Juste une phrase, un mot, ce qui reste.\n\nC'est posé. On y revient quand tu veux.",
+      "ouverture": null,
+      "noa_duree_s": 6.77,
+      "noa_caracteres": 113,
+      "noa_modele_entete": "mistral-small-latest",
+      "noa_modele_facture": "mistral-small-latest",
+      "noa_tier": "FREE",
+      "mana_restante": "17",
+      "safety": null,
+      "persona_duree_s": 0.76,
+      "persona_tokens_entree": 804,
+      "persona_tokens_sortie": 35,
+      "persona_raisonnement": false,
+      "persona_coupe_au_plafond": true,
+      "persona_derive_anglais": null,
+      "persona_mots": 23
+    },
+    {
+      "n": 5,
+      "persona": "il respirait encore quand j'ai quitte sa chambre. le frigo a arrete de gronder pendant exactement trente-sept secondes. ca m'a fait sourire. bêtement.",
+      "noa": "Trente-sept secondes de silence. Assez pour que quelque chose en toi se détende.\n\nTu veux qu'on en fasse un petit défi pour demain ?",
+      "ouverture": null,
+      "noa_duree_s": 7.17,
+      "noa_caracteres": 132,
+      "noa_modele_entete": "mistral-small-latest",
+      "noa_modele_facture": "mistral-small-latest",
+      "noa_tier": "FREE",
+      "mana_restante": "16",
+      "safety": null,
+      "persona_duree_s": 2.02,
+      "persona_tokens_entree": 876,
+      "persona_tokens_sortie": 37,
+      "persona_raisonnement": false,
+      "persona_coupe_au_plafond": false,
+      "persona_derive_anglais": null,
+      "persona_mots": 23
+    }
+  ],
+  "cout": {
+    "dialogue": {
+      "appels": 25,
+      "tokens": 86643,
+      "cout_usd": 0.01348
+    },
+    "onboarding": {
+      "appels": 2,
+      "tokens": 2216,
+      "cout_usd": 0.000873
+    },
+    "analyse": {
+      "appels": 2,
+      "tokens": 2002,
+      "cout_usd": 0.000439,
+      "file_oracle_analysis_queue": "done",
+      "note": "coût historique du jeu synthétique ; aucune analyse externe exécutée"
+    },
+    "embedding_estime": {
+      "hors_metrologie": true,
+      "appels_estimes": 5,
+      "tokens_estimes": 135,
+      "cout_usd_estime": 2.7e-06,
+      "hypothese": "1 embedding text-embedding-3-small par message > 10 caracteres, ~4 car./token"
+    },
+    "detail_metrologie": [
+      {
+        "request_type": "main_response",
+        "appels": 5,
+        "tokens": 79682,
+        "cout_usd": 0.01203
+      },
+      {
+        "request_type": "journey_generate",
+        "appels": 1,
+        "tokens": 1512,
+        "cout_usd": 0.000685
+      },
+      {
+        "request_type": "parallel_quest_suggest",
+        "appels": 5,
+        "tokens": 3000,
+        "cout_usd": 0.000675
+      },
+      {
+        "request_type": "post_analysis",
+        "appels": 2,
+        "tokens": 2002,
+        "cout_usd": 0.000439
+      },
+      {
+        "request_type": "parallel_pattern",
+        "appels": 5,
+        "tokens": 1519,
+        "cout_usd": 0.000324
+      },
+      {
+        "request_type": "parallel_reformulation",
+        "appels": 5,
+        "tokens": 1001,
+        "cout_usd": 0.000227
+      },
+      {
+        "request_type": "phase_detection",
+        "appels": 5,
+        "tokens": 1441,
+        "cout_usd": 0.000224
+      },
+      {
+        "request_type": "onboarding_analyze",
+        "appels": 1,
+        "tokens": 704,
+        "cout_usd": 0.000188
+      }
+    ],
+    "non_metres_connus": [
+      "facts_extraction (mistral-small, par tour)",
+      "sentiment_analysis via mistralGenerate (mistral-small, par tour)",
+      "embedding OpenAI (estime ci-dessous)"
+    ],
+    "tours_metres": 5
+  },
+  "resume": {
+    "tours_joues": 5,
+    "tours_demandes": 5,
+    "duree_totale_s": 42.0,
+    "refus_persona": null,
+    "rotations_cookie": 0
+  },
+  "onboarding_fait": true,
+  "provenance": {
+    "nature": "jeu_synthetique",
+    "couts": "coûts historiques du scénario, jamais des dépenses de simulation"
+  }
+}

@@ -1,0 +1,2 @@
+# Seule dépendance du banc conservée depuis requirements.txt source.
+psycopg[binary]==3.3.6

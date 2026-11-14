@@ -1,0 +1,35 @@
+version: 2
+sources:
+- name: brut
+  schema: banc_brut
+  description: 'Couche brute : les fichiers JSON du banc tels quels, chargés par entrepot/charger.py.'
+  tables:
+  - name: run
+    description: Un run de dialogue (runs/<campagne>/<campagne>-*.json).
+  - name: fiche_persona
+    description: Les fiches persona (personas/*.json).
+  - name: appel_juge
+    description: Sorties déterministes des deux juges factices, sans notes humaines.
+  - name: correspondance_notation
+    description: Code anonyme de notation -> fichier du run, par campagne.
+  - name: campagne
+    description: Description de la campagne de simulation générée au chargement.
+  - name: grille
+    description: Axes du référentiel demo/GRILLE.md.
+  - name: controle_persona
+    description: Contrôles Python du persona (runs/<campagne>/controles/persona.json,
+      banc/personas/controles_persona.py).
+- name: calcul
+  schema: banc
+  description: Tables écrites par les tâches Python de la chaîne, hors dbt.
+  tables:
+  - name: fait_accord
+    description: Mesures d'accord (alpha de Krippendorff, kappa) écrites par entrepot/calculer_accord.py.
+    columns:
+    - name: campagne_id
+      data_tests:
+      - not_null
+      - relationships:
+          arguments:
+            to: ref('dim_campagne')
+            field: campagne_id

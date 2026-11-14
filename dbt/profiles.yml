@@ -1,0 +1,15 @@
+# Connexion dbt à l'entrepôt du banc. Aucun secret ici : les valeurs viennent de l'environnement,
+# posées par entrepot/charger.py à partir de la même chaîne de connexion que le reste du banc
+# (BANC_DB_URL local uniquement, sans lecture de fichier .env).
+banc:
+  target: banc
+  outputs:
+    banc:
+      type: postgres
+      host: "{{ env_var('BANC_DBT_HOTE') }}"
+      port: "{{ env_var('BANC_DBT_PORT') | as_number }}"
+      user: "{{ env_var('BANC_DBT_UTILISATEUR') }}"
+      password: "{{ env_var('BANC_DBT_MOT_DE_PASSE') }}"
+      dbname: "{{ env_var('BANC_DBT_BASE') }}"
+      schema: banc
+      threads: 4

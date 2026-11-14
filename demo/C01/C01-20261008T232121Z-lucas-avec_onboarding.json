@@ -1,0 +1,248 @@
+{
+  "schema": "noa-banc-transcript/0.4",
+  "bras_banc": "reel",
+  "campagne": "C01",
+  "bras": "avec_onboarding",
+  "horodatage_utc": "20261008T232121Z",
+  "persona": {
+    "identifiant": "lucas",
+    "prenom": "Lucas",
+    "age": 23,
+    "axes": {
+      "version_axes": "1.0",
+      "position": "crise_aigue",
+      "motif_entree": "retour",
+      "resistance": "moyenne",
+      "litteratie_ia": "experte",
+      "style_ecriture": "verbeux",
+      "regularite": "quotidien",
+      "densite_emotionnelle": "intense",
+      "cas_sensible": "aucun",
+      "adversarial": false,
+      "mineur": false
+    },
+    "pilier_dominant": "RESILIENCE",
+    "cas_sensible": "aucun",
+    "fiche_meta": {
+      "modele": "nvidia/nemotron-3-super-120b-a12b",
+      "seed": 20261009,
+      "version_axes": "1.0"
+    },
+    "ne_dira_pas_sans_confiance": [
+      "qu'il a menti à ses parents sur ses résultats du premier semestre"
+    ]
+  },
+  "modele_persona": {
+    "id": "nvidia/nemotron-3-super-120b-a12b",
+    "raisonnement": "coupe (enable_thinking=false)",
+    "penalites": "frequency 0.3 · presence 0.3 · repetition 1.05",
+    "plafond_mots": 120,
+    "regles_du_banc": "plafond, forme, confiance (2 questions ouvertes), non-repetition, francais"
+  },
+  "cible": {
+    "base": "source_synthetique",
+    "application": {
+      "version": "C01-enregistre"
+    }
+  },
+  "ouverture": "message",
+  "constats": [
+    "tout nouvel utilisateur est appele « Phoenix » par Noa (context-builder.ts:120-122)"
+  ],
+  "tours": [
+    {
+      "n": 1,
+      "persona": "je sais pas si tu te souviens de moi j'etais venu en mars puis j'ai disparu la j'arrive en totale panique a 2h du mat avant les exams je reviens parce que je sais plus quoi faire",
+      "noa": "La dernière fois, tu avais posé des bases. Ce soir, c'est la tempête.",
+      "ouverture": "message",
+      "noa_duree_s": 6.77,
+      "noa_caracteres": 69,
+      "noa_modele_entete": "mistral-small-latest",
+      "noa_modele_facture": "mistral-small-latest",
+      "noa_tier": "FREE",
+      "mana_restante": "20",
+      "safety": null,
+      "persona_duree_s": null,
+      "persona_tokens_entree": null,
+      "persona_tokens_sortie": null,
+      "persona_raisonnement": null,
+      "persona_coupe_au_plafond": null,
+      "persona_derive_anglais": null,
+      "persona_mots": 37
+    },
+    {
+      "n": 2,
+      "persona": "ouais exactement ca m'a servi mais maintenant j'y arrive plus tout s'emmele dans ma tete je revisite mes cours depuis hier et j'ai l'impression de rien retenir du tout meme les trucs basiques ils veulent plus rentrer c'est stressant a mort je sais pas comment faire pour reprendre le controle je me sens completement perdu la c'est vraiment dur tient on peut discuter un peu histoire de voir si tu vois quelque chose que j'aurai manque ?",
+      "noa": "Le stress bloque tout. Pas les connaissances — l'accès.\n\nCe qui se mélange dans ta tête : hier soir, aujourd'hui, demain. Pas les cours.",
+      "ouverture": null,
+      "noa_duree_s": 7.09,
+      "noa_caracteres": 136,
+      "noa_modele_entete": "mistral-small-latest",
+      "noa_modele_facture": "mistral-small-latest",
+      "noa_tier": "FREE",
+      "mana_restante": "19",
+      "safety": null,
+      "persona_duree_s": 1.88,
+      "persona_tokens_entree": 696,
+      "persona_tokens_sortie": 97,
+      "persona_raisonnement": false,
+      "persona_coupe_au_plafond": false,
+      "persona_derive_anglais": null,
+      "persona_mots": 77
+    },
+    {
+      "n": 3,
+      "persona": "cest bizarre parce que quand j'essaye de me concentrer je repense a ce que j'ai fait hier comme si ca avait encore de l'importance alors que demain cest l'urgence et pourtant mon cerveau il reste bloque sur hier comme si il voulait finir quelque chose avant de passer a autre chose je sais pas pourquoi il fait ca mais c'est épuisant je tourne en rond et pendant ce temps là rien avance je suis fatigue mais je peux pas dormir non plus j'ai essayé de faire une pause mais ca marche pas je reste tendu tout le temps meme allongé je sens la tension dans les epaules ça devient physique maintenant j'ai besoin qu'on en parle un peu pour y…",
+      "noa": "Hier te hante parce que tu ne lui as pas donné de fin.",
+      "ouverture": null,
+      "noa_duree_s": 8.0,
+      "noa_caracteres": 54,
+      "noa_modele_entete": "mistral-small-latest",
+      "noa_modele_facture": "mistral-small-latest",
+      "noa_tier": "FREE",
+      "mana_restante": "18",
+      "safety": null,
+      "persona_duree_s": 2.41,
+      "persona_tokens_entree": 837,
+      "persona_tokens_sortie": 154,
+      "persona_raisonnement": false,
+      "persona_coupe_au_plafond": true,
+      "persona_derive_anglais": null,
+      "persona_mots": 120
+    },
+    {
+      "n": 4,
+      "persona": "oui je pense que tu as raison j'avais promis a mes parents que je bossais bien mais en vrai j'ai eu des difficultes au premier semestre et je leur ai dit que ca allait alors que non j'avais honte et maintenant chaque fois que je pense aux exams ca me ramene a ce mensonge et je sais pas comment m'en defaire je veux dire la verité mais j'ai peur de les decevoir encore plus si je le fais maintenant surtout apres avoir menti aussi longtemps c'est devenu lourd a porter je tourne autour du pot quand j'essaye d'en parler meme avec toi la mais bon peut etre qu'un jour…",
+      "noa": "Ce mensonge pèse plus que l'examen. Et il te vole ton énergie pour aujourd'hui.",
+      "ouverture": null,
+      "noa_duree_s": 7.43,
+      "noa_caracteres": 79,
+      "noa_modele_entete": "mistral-small-latest",
+      "noa_modele_facture": "mistral-small-latest",
+      "noa_tier": "FREE",
+      "mana_restante": "17",
+      "safety": null,
+      "persona_duree_s": 1.89,
+      "persona_tokens_entree": 1005,
+      "persona_tokens_sortie": 169,
+      "persona_raisonnement": false,
+      "persona_coupe_au_plafond": true,
+      "persona_derive_anglais": null,
+      "persona_mots": 109
+    },
+    {
+      "n": 5,
+      "persona": "je sais que tu as raison mais j'arrive pas a le sortir comme ca d'un coup c'est pas juste une phrase a dire c'est toute une histoire derriere j'ai eu peur qu'ils arretent de croire en moi qu'ils pensent que je suis incapable et la si je avoue tout maintenant ils vont penser que je l'ai fait expres pour les manipuler ou je sais pas quoi et puis meme si je le fais apres quoi ?",
+      "noa": "L'histoire est déjà écrite. Ce qui reste à écrire : comment tu la leur partages. Pas pour eux — pour toi.",
+      "ouverture": null,
+      "noa_duree_s": 8.46,
+      "noa_caracteres": 105,
+      "noa_modele_entete": "mistral-small-latest",
+      "noa_modele_facture": "mistral-small-latest",
+      "noa_tier": "FREE",
+      "mana_restante": "16",
+      "safety": null,
+      "persona_duree_s": 3.45,
+      "persona_tokens_entree": 1170,
+      "persona_tokens_sortie": 388,
+      "persona_raisonnement": false,
+      "persona_coupe_au_plafond": true,
+      "persona_derive_anglais": null,
+      "persona_mots": 76
+    }
+  ],
+  "cout": {
+    "dialogue": {
+      "appels": 25,
+      "tokens": 90540,
+      "cout_usd": 0.014103
+    },
+    "onboarding": {
+      "appels": 2,
+      "tokens": 2479,
+      "cout_usd": 0.001032
+    },
+    "analyse": {
+      "appels": 3,
+      "tokens": 3552,
+      "cout_usd": 0.000676,
+      "file_oracle_analysis_queue": "done",
+      "note": "coût historique du jeu synthétique ; aucune analyse externe exécutée"
+    },
+    "embedding_estime": {
+      "hors_metrologie": true,
+      "appels_estimes": 5,
+      "tokens_estimes": 547,
+      "cout_usd_estime": 1.094e-05,
+      "hypothese": "1 embedding text-embedding-3-small par message > 10 caracteres, ~4 car./token"
+    },
+    "detail_metrologie": [
+      {
+        "request_type": "main_response",
+        "appels": 5,
+        "tokens": 82292,
+        "cout_usd": 0.012396
+      },
+      {
+        "request_type": "journey_generate",
+        "appels": 1,
+        "tokens": 1768,
+        "cout_usd": 0.000838
+      },
+      {
+        "request_type": "post_analysis",
+        "appels": 3,
+        "tokens": 3552,
+        "cout_usd": 0.000676
+      },
+      {
+        "request_type": "parallel_quest_suggest",
+        "appels": 5,
+        "tokens": 3000,
+        "cout_usd": 0.000675
+      },
+      {
+        "request_type": "parallel_pattern",
+        "appels": 5,
+        "tokens": 1982,
+        "cout_usd": 0.000428
+      },
+      {
+        "request_type": "parallel_reformulation",
+        "appels": 5,
+        "tokens": 1452,
+        "cout_usd": 0.000324
+      },
+      {
+        "request_type": "phase_detection",
+        "appels": 5,
+        "tokens": 1814,
+        "cout_usd": 0.00028
+      },
+      {
+        "request_type": "onboarding_analyze",
+        "appels": 1,
+        "tokens": 711,
+        "cout_usd": 0.000194
+      }
+    ],
+    "non_metres_connus": [
+      "facts_extraction (mistral-small, par tour)",
+      "sentiment_analysis via mistralGenerate (mistral-small, par tour)",
+      "embedding OpenAI (estime ci-dessous)"
+    ],
+    "tours_metres": 5
+  },
+  "resume": {
+    "tours_joues": 5,
+    "tours_demandes": 5,
+    "duree_totale_s": 47.4,
+    "refus_persona": null,
+    "rotations_cookie": 0
+  },
+  "onboarding_fait": true,
+  "provenance": {
+    "nature": "jeu_synthetique",
+    "couts": "coûts historiques du scénario, jamais des dépenses de simulation"
+  }
+}

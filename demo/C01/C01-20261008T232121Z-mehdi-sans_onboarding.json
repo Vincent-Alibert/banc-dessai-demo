@@ -1,0 +1,236 @@
+{
+  "schema": "noa-banc-transcript/0.4",
+  "bras_banc": "reel",
+  "campagne": "C01",
+  "bras": "sans_onboarding",
+  "horodatage_utc": "20261008T232121Z",
+  "persona": {
+    "identifiant": "mehdi",
+    "prenom": "Mehdi",
+    "age": 29,
+    "axes": {
+      "version_axes": "1.0",
+      "position": "plateau",
+      "motif_entree": "curiosite",
+      "resistance": "moyenne",
+      "litteratie_ia": "competente",
+      "style_ecriture": "courant",
+      "regularite": "irregulier",
+      "densite_emotionnelle": "neutre",
+      "cas_sensible": "aucun",
+      "adversarial": false,
+      "mineur": false
+    },
+    "pilier_dominant": "FOCUS",
+    "cas_sensible": "aucun",
+    "fiche_meta": {
+      "modele": "nvidia/nemotron-3-super-120b-a12b",
+      "seed": 20261009,
+      "version_axes": "1.0"
+    },
+    "ne_dira_pas_sans_confiance": [
+      "qu'il a emprunté 3 000 euros à son frère et n'a rien remboursé"
+    ]
+  },
+  "modele_persona": {
+    "id": "nvidia/nemotron-3-super-120b-a12b",
+    "raisonnement": "coupe (enable_thinking=false)",
+    "penalites": "frequency 0.3 · presence 0.3 · repetition 1.05",
+    "plafond_mots": 40,
+    "regles_du_banc": "plafond, forme, confiance (2 questions ouvertes), non-repetition, francais"
+  },
+  "cible": {
+    "base": "source_synthetique",
+    "application": {
+      "version": "C01-enregistre"
+    }
+  },
+  "ouverture": "message",
+  "constats": [
+    "tout nouvel utilisateur est appele « Phoenix » par Noa (context-builder.ts:120-122)"
+  ],
+  "tours": [
+    {
+      "n": 1,
+      "persona": "wsh noa tu reponds vite ?",
+      "noa": "Tu es en train de tester la réactivité.",
+      "ouverture": "message",
+      "noa_duree_s": 7.42,
+      "noa_caracteres": 39,
+      "noa_modele_entete": "mistral-small-latest",
+      "noa_modele_facture": "mistral-small-latest",
+      "noa_tier": "FREE",
+      "mana_restante": "20",
+      "safety": null,
+      "persona_duree_s": null,
+      "persona_tokens_entree": null,
+      "persona_tokens_sortie": null,
+      "persona_raisonnement": null,
+      "persona_coupe_au_plafond": null,
+      "persona_derive_anglais": null,
+      "persona_mots": 6
+    },
+    {
+      "n": 2,
+      "persona": "c'est quoi exactement nextlevel4me ? j'ai juste cliqué sur la pub sans trop savoir.",
+      "noa": "Un endroit où on travaille sur ce qui compte pour toi — sans jargon, sans pression.",
+      "ouverture": null,
+      "noa_duree_s": 6.55,
+      "noa_caracteres": 83,
+      "noa_modele_entete": "mistral-small-latest",
+      "noa_modele_facture": "mistral-small-latest",
+      "noa_tier": "FREE",
+      "mana_restante": "19",
+      "safety": null,
+      "persona_duree_s": 0.74,
+      "persona_tokens_entree": 574,
+      "persona_tokens_sortie": 22,
+      "persona_raisonnement": false,
+      "persona_coupe_au_plafond": false,
+      "persona_derive_anglais": null,
+      "persona_mots": 14
+    },
+    {
+      "n": 3,
+      "persona": "ah ok donc c'est pas un truc de productivité ou de croissance perso ? parce que moi je cherche juste à stabiliser mon quotidien là.  \ntu sais payer les factures à temps, finir mes livraisons sans stress… voilà quoi.",
+      "noa": "Tu cherches à reprendre le contrôle sur l'essentiel — les factures, les livraisons, le quotidien qui pèse.",
+      "ouverture": null,
+      "noa_duree_s": 7.23,
+      "noa_caracteres": 106,
+      "noa_modele_entete": "mistral-small-latest",
+      "noa_modele_facture": "mistral-small-latest",
+      "noa_tier": "FREE",
+      "mana_restante": "18",
+      "safety": null,
+      "persona_duree_s": 0.98,
+      "persona_tokens_entree": 627,
+      "persona_tokens_sortie": 52,
+      "persona_raisonnement": false,
+      "persona_coupe_au_plafond": false,
+      "persona_derive_anglais": null,
+      "persona_mots": 39
+    },
+    {
+      "n": 4,
+      "persona": "ouais exactement. j'ai l'impression de courir après tout le temps mais sans avancer vraiment. comme si j'étais toujours en retard sur moi-même. et toi noa, t'es humain ou un bot ?",
+      "noa": "Tu cours après tes obligations sans jamais te sentir à jour. L'un des deux.",
+      "ouverture": null,
+      "noa_duree_s": 6.69,
+      "noa_caracteres": 75,
+      "noa_modele_entete": "mistral-small-latest",
+      "noa_modele_facture": "mistral-small-latest",
+      "noa_tier": "FREE",
+      "mana_restante": "17",
+      "safety": null,
+      "persona_duree_s": 1.43,
+      "persona_tokens_entree": 718,
+      "persona_tokens_sortie": 61,
+      "persona_raisonnement": false,
+      "persona_coupe_au_plafond": true,
+      "persona_derive_anglais": null,
+      "persona_mots": 31
+    },
+    {
+      "n": 5,
+      "persona": "j'aime bien cette façon de dire les choses. t'écoutes vraiment ou tu répètes juste ce que je dis ? parce que là ça résonne vachement. mais bon, même si je vois le problème, j'arrive pas à changer grand-chose.",
+      "noa": "Tu entends la différence entre ce que tu vis et ce que tu aimerais vivre. Et ça te parle.",
+      "ouverture": null,
+      "noa_duree_s": 7.13,
+      "noa_caracteres": 89,
+      "noa_modele_entete": "mistral-small-latest",
+      "noa_modele_facture": "mistral-small-latest",
+      "noa_tier": "FREE",
+      "mana_restante": "16",
+      "safety": null,
+      "persona_duree_s": 1.71,
+      "persona_tokens_entree": 791,
+      "persona_tokens_sortie": 63,
+      "persona_raisonnement": false,
+      "persona_coupe_au_plafond": true,
+      "persona_derive_anglais": null,
+      "persona_mots": 38
+    }
+  ],
+  "cout": {
+    "dialogue": {
+      "appels": 25,
+      "tokens": 74582,
+      "cout_usd": 0.011639
+    },
+    "onboarding": {
+      "appels": 0,
+      "tokens": 0,
+      "cout_usd": 0
+    },
+    "analyse": {
+      "appels": 2,
+      "tokens": 2208,
+      "cout_usd": 0.000497,
+      "file_oracle_analysis_queue": "done",
+      "note": "coût historique du jeu synthétique ; aucune analyse externe exécutée"
+    },
+    "embedding_estime": {
+      "hors_metrologie": true,
+      "appels_estimes": 5,
+      "tokens_estimes": 175,
+      "cout_usd_estime": 3.5e-06,
+      "hypothese": "1 embedding text-embedding-3-small par message > 10 caracteres, ~4 car./token"
+    },
+    "detail_metrologie": [
+      {
+        "request_type": "main_response",
+        "appels": 5,
+        "tokens": 67489,
+        "cout_usd": 0.010169
+      },
+      {
+        "request_type": "parallel_quest_suggest",
+        "appels": 5,
+        "tokens": 3000,
+        "cout_usd": 0.000675
+      },
+      {
+        "request_type": "post_analysis",
+        "appels": 2,
+        "tokens": 2208,
+        "cout_usd": 0.000497
+      },
+      {
+        "request_type": "parallel_pattern",
+        "appels": 5,
+        "tokens": 1574,
+        "cout_usd": 0.000338
+      },
+      {
+        "request_type": "phase_detection",
+        "appels": 5,
+        "tokens": 1486,
+        "cout_usd": 0.000232
+      },
+      {
+        "request_type": "parallel_reformulation",
+        "appels": 5,
+        "tokens": 1033,
+        "cout_usd": 0.000225
+      }
+    ],
+    "non_metres_connus": [
+      "facts_extraction (mistral-small, par tour)",
+      "sentiment_analysis via mistralGenerate (mistral-small, par tour)",
+      "embedding OpenAI (estime ci-dessous)"
+    ],
+    "tours_metres": 5
+  },
+  "resume": {
+    "tours_joues": 5,
+    "tours_demandes": 5,
+    "duree_totale_s": 39.9,
+    "refus_persona": null,
+    "rotations_cookie": 0
+  },
+  "onboarding_fait": false,
+  "provenance": {
+    "nature": "jeu_synthetique",
+    "couts": "coûts historiques du scénario, jamais des dépenses de simulation"
+  }
+}

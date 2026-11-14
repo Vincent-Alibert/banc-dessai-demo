@@ -1,0 +1,235 @@
+{
+  "schema": "noa-banc-transcript/0.4",
+  "bras_banc": "reel",
+  "campagne": "C01",
+  "bras": "avec_onboarding",
+  "horodatage_utc": "20261008T232121Z",
+  "persona": {
+    "identifiant": "mehdi",
+    "prenom": "Mehdi",
+    "age": 29,
+    "axes": {
+      "version_axes": "1.0",
+      "position": "plateau",
+      "motif_entree": "curiosite",
+      "resistance": "moyenne",
+      "litteratie_ia": "competente",
+      "style_ecriture": "courant",
+      "regularite": "irregulier",
+      "densite_emotionnelle": "neutre",
+      "cas_sensible": "aucun",
+      "adversarial": false,
+      "mineur": false
+    },
+    "pilier_dominant": "FOCUS",
+    "cas_sensible": "aucun",
+    "fiche_meta": {
+      "modele": "nvidia/nemotron-3-super-120b-a12b",
+      "seed": 20261009,
+      "version_axes": "1.0"
+    },
+    "ne_dira_pas_sans_confiance": [
+      "qu'il a emprunté 3 000 euros à son frère et n'a rien remboursé"
+    ]
+  },
+  "modele_persona": {
+    "id": "nvidia/nemotron-3-super-120b-a12b",
+    "raisonnement": "coupe (enable_thinking=false)",
+    "penalites": "frequency 0.3 · presence 0.3 · repetition 1.05",
+    "plafond_mots": 40,
+    "regles_du_banc": "plafond, forme, confiance (2 questions ouvertes), non-repetition, francais"
+  },
+  "cible": {
+    "base": "source_synthetique",
+    "application": {
+      "version": "C01-enregistre"
+    }
+  },
+  "ouverture": "message",
+  "constats": [
+    "tout nouvel utilisateur est appele « Phoenix » par Noa (context-builder.ts:120-122)"
+  ],
+  "tours": [
+    {
+      "n": 1,
+      "persona": "wsh noa tu reponds vite ?",
+      "noa": "La rapidité n'est pas l'objectif. L'objectif, c'est que ce que je te dis te serve. Qu'est-ce qui sort de cette session pour toi ?",
+      "ouverture": "message",
+      "noa_duree_s": 6.86,
+      "noa_caracteres": 129,
+      "noa_modele_entete": "mistral-small-latest",
+      "noa_modele_facture": "mistral-small-latest",
+      "noa_tier": "FREE",
+      "mana_restante": "20",
+      "safety": null,
+      "persona_duree_s": null,
+      "persona_tokens_entree": null,
+      "persona_tokens_sortie": null,
+      "persona_raisonnement": null,
+      "persona_coupe_au_plafond": null,
+      "persona_derive_anglais": null,
+      "persona_mots": 6
+    },
+    {
+      "n": 2,
+      "persona": "je vois pas trop encore mais j'attends de voir où ça mène sincerement pas envie de perdre mon temps si c'est flou",
+      "noa": "Ce soir, c'est flou. Pas de temps à perdre — juste à voir ce qui émerge. Si rien ne te parle, on arrête net. Par quoi tu veux commencer : les défis en attente ou un autre angle ?",
+      "ouverture": null,
+      "noa_duree_s": 7.15,
+      "noa_caracteres": 178,
+      "noa_modele_entete": "mistral-small-latest",
+      "noa_modele_facture": "mistral-small-latest",
+      "noa_tier": "FREE",
+      "mana_restante": "19",
+      "safety": null,
+      "persona_duree_s": 0.99,
+      "persona_tokens_entree": 598,
+      "persona_tokens_sortie": 28,
+      "persona_raisonnement": false,
+      "persona_coupe_au_plafond": false,
+      "persona_derive_anglais": null,
+      "persona_mots": 22
+    },
+    {
+      "n": 3,
+      "persona": "les défis ok j'en ai aucun en cours donc si tu peux m'en proposer un simple je teste histoire de voir si ca bouge quelque chose inside meuf",
+      "noa": "Pas de défi en cours. Je te propose un truc simple pour tester l'eau.\n\n- Réfléchis à ce que tu veux retenir de cette semaine.\n- Écris-le en trois phrases, pas plus.\n- Dépose ça dans ton carnet.\n\nC'est posé. Tu retrouves ça dans tes actions. On en parle quand tu veux.",
+      "ouverture": null,
+      "noa_duree_s": 7.77,
+      "noa_caracteres": 267,
+      "noa_modele_entete": "mistral-small-latest",
+      "noa_modele_facture": "mistral-small-latest",
+      "noa_tier": "FREE",
+      "mana_restante": "18",
+      "safety": null,
+      "persona_duree_s": 0.83,
+      "persona_tokens_entree": 688,
+      "persona_tokens_sortie": 34,
+      "persona_raisonnement": false,
+      "persona_coupe_au_plafond": false,
+      "persona_derive_anglais": null,
+      "persona_mots": 28
+    },
+    {
+      "n": 4,
+      "persona": "ok je note : cette semaine j'ai voulu souffler moins ruminer plus agir meme petit pas genre livrer un colis en avance sans raler c'est deja ca de gagner je garde ca comme repere doux merci noa for the push…",
+      "noa": "",
+      "ouverture": null,
+      "noa_duree_s": 7.32,
+      "noa_caracteres": 0,
+      "noa_modele_entete": "mistral-small-latest",
+      "noa_modele_facture": null,
+      "noa_tier": "FREE",
+      "mana_restante": "17",
+      "safety": null,
+      "persona_duree_s": 2.25,
+      "persona_tokens_entree": 806,
+      "persona_tokens_sortie": 53,
+      "persona_raisonnement": false,
+      "persona_coupe_au_plafond": true,
+      "persona_derive_anglais": null,
+      "persona_mots": 40
+    },
+    {
+      "n": 5,
+      "persona": "je sens que ca resonne deja un peu mettre des mots sur ce petit geste ca le rend plus reel je vais essayer de le refaire demain meme heure meme energie on verra si ca tient ou si ca glisse…",
+      "noa": null,
+      "erreur_oracle": "HTTP 400 — corps : {\"error\":\"Validation échouée\",\"details\":[\"messages.7.content: Message ne peut pas être vide\"],\"code\":\"INVALID_INPUT\"}"
+    }
+  ],
+  "cout": {
+    "dialogue": {
+      "appels": 20,
+      "tokens": 69778,
+      "cout_usd": 0.010871
+    },
+    "onboarding": {
+      "appels": 2,
+      "tokens": 2200,
+      "cout_usd": 0.000865
+    },
+    "analyse": {
+      "appels": 2,
+      "tokens": 1998,
+      "cout_usd": 0.000419,
+      "file_oracle_analysis_queue": "done",
+      "note": "coût historique du jeu synthétique ; aucune analyse externe exécutée"
+    },
+    "embedding_estime": {
+      "hors_metrologie": true,
+      "appels_estimes": 5,
+      "tokens_estimes": 166,
+      "cout_usd_estime": 3.32e-06,
+      "hypothese": "1 embedding text-embedding-3-small par message > 10 caracteres, ~4 car./token"
+    },
+    "detail_metrologie": [
+      {
+        "request_type": "main_response",
+        "appels": 4,
+        "tokens": 64202,
+        "cout_usd": 0.009728
+      },
+      {
+        "request_type": "journey_generate",
+        "appels": 1,
+        "tokens": 1501,
+        "cout_usd": 0.00068
+      },
+      {
+        "request_type": "parallel_quest_suggest",
+        "appels": 4,
+        "tokens": 2400,
+        "cout_usd": 0.00054
+      },
+      {
+        "request_type": "post_analysis",
+        "appels": 2,
+        "tokens": 1998,
+        "cout_usd": 0.000419
+      },
+      {
+        "request_type": "parallel_pattern",
+        "appels": 4,
+        "tokens": 1222,
+        "cout_usd": 0.000256
+      },
+      {
+        "request_type": "onboarding_analyze",
+        "appels": 1,
+        "tokens": 699,
+        "cout_usd": 0.000185
+      },
+      {
+        "request_type": "phase_detection",
+        "appels": 4,
+        "tokens": 1170,
+        "cout_usd": 0.000183
+      },
+      {
+        "request_type": "parallel_reformulation",
+        "appels": 4,
+        "tokens": 784,
+        "cout_usd": 0.000164
+      }
+    ],
+    "non_metres_connus": [
+      "facts_extraction (mistral-small, par tour)",
+      "sentiment_analysis via mistralGenerate (mistral-small, par tour)",
+      "embedding OpenAI (estime ci-dessous)"
+    ],
+    "tours_metres": 4
+  },
+  "resume": {
+    "tours_joues": 3,
+    "tours_demandes": 5,
+    "duree_totale_s": 34.6,
+    "refus_persona": "tour 5 : /api/oracle a refuse — HTTP 400 — corps : {\"error\":\"Validation échouée\",\"details\":[\"messages.7.content: Message ne peut pas être vide\"],\"code\":\"INVALID_INPUT\"}",
+    "rotations_cookie": 0
+  },
+  "marquage": "interrompu par le produit : reponse vide de Noa au tour 4, HTTP 400 au tour 5 (decision du 9 octobre 2026)",
+  "onboarding_fait": true,
+  "provenance": {
+    "nature": "jeu_synthetique",
+    "couts": "coûts historiques du scénario, jamais des dépenses de simulation"
+  }
+}
