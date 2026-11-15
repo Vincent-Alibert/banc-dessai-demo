@@ -17,6 +17,7 @@ from collections import Counter
 from contextlib import ExitStack
 from datetime import datetime, timezone
 from pathlib import Path
+from typing import overload
 
 from banc import chemins
 from banc.campagnes import campagnes
@@ -579,6 +580,10 @@ def dialoguer(
 # ---------------------------------------------------------------------------
 
 
+@overload
+def lire_option(args: list[str], nom: str, defaut: str) -> str: ...
+@overload
+def lire_option(args: list[str], nom: str, defaut: None) -> str | None: ...
 def lire_option(args: list[str], nom: str, defaut: str | None) -> str | None:
     if nom not in args:
         return defaut
@@ -905,10 +910,12 @@ def lancer(args: list[str], campagne: str, pile: ExitStack) -> int:
     def autoriser(rang: int) -> str | None:
         if paralleles == 1:
             return autoriser_sequentiel(rang)
+        assert budget is not None  # --paralleles valide de 1 a PARALLELES_MAX : ici > 1, budget cree
         montant, motif = budget.reserver("noa")
         if motif:
             print(f"\n[ARRET] {motif}")
             return motif
+        assert montant is not None  # Plafond.reserver rend (montant, None) ou (None, motif)
         bras, f = a_faire[rang]
         ecrire_reservation(campagne, horodatage, f.identifiant, bras, montant)
         reserves[rang] = montant
@@ -930,7 +937,9 @@ def lancer(args: list[str], campagne: str, pile: ExitStack) -> int:
     def terminer(rang: int, run: dict | None, erreur: Exception | None) -> None:
         bras, f = a_faire[rang]
         if erreur is None:
+            assert run is not None  # executer : sans erreur, resultat = faire(tache), un dict
             if paralleles > 1:
+                assert budget is not None  # cree quand paralleles > 1
                 reserve, cout = reserves.pop(rang), cout_noa(run)
                 if (run.get("cout", {}).get("analyse") or {}).get("file_oracle_analysis_queue") != "done":
                     # analyse n8n non terminee a l'ecriture du run : son cout arrivera apres ; la reservation reste
@@ -946,6 +955,7 @@ def lancer(args: list[str], campagne: str, pile: ExitStack) -> int:
         # une erreur n'arrete pas la campagne ; interruption et garde (production) traversent executer. En
         # parallele, la reservation reste comptee (ici, et par son fichier aux executions suivantes)
         if paralleles > 1:
+            assert budget is not None  # cree quand paralleles > 1
             budget.liberer("noa", reserves.pop(rang), None)
         envoyer_direct("dialogues_tronques")
         envoyer_cout()

@@ -24,11 +24,13 @@ from __future__ import annotations
 import sys
 from collections import Counter
 from itertools import permutations
+from typing import Any, cast
 
 
-def _coincidences(donnees: dict) -> tuple[dict, Counter, float]:
+def _coincidences(donnees: dict) -> tuple[dict[tuple, float], dict[Any, float], float]:
     """Matrice de coincidences o[(c, k)], marges n_c, total n (Krippendorff 2011, §2)."""
-    o: Counter = Counter()
+    # Des Counter (0 pour une cle absente) a poids flottants ; typeshed type les valeurs d'un Counter en int.
+    o = cast("dict[tuple, float]", Counter())
     for notes in donnees.values():
         valeurs = [v for v in notes.values() if v is not None]
         m = len(valeurs)
@@ -36,13 +38,13 @@ def _coincidences(donnees: dict) -> tuple[dict, Counter, float]:
             continue
         for c, k in permutations(valeurs, 2):
             o[(c, k)] += 1 / (m - 1)
-    marges: Counter = Counter()
+    marges = cast("dict[Any, float]", Counter())
     for (c, _k), poids in o.items():
         marges[c] += poids
     return o, marges, sum(marges.values())
 
 
-def _distance2(c, k, niveau: str, marges: Counter, valeurs: list) -> float:
+def _distance2(c, k, niveau: str, marges: dict[Any, float], valeurs: list) -> float:
     if niveau == "nominal":
         return 0.0 if c == k else 1.0
     if niveau == "intervalle":

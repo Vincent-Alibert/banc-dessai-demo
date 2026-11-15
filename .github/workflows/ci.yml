@@ -1,5 +1,5 @@
 # CI du depot de demonstration : aucun secret ni appel payant ; actions epinglees par SHA pour une execution
-# reproductible, mypy seul non bloquant.
+# reproductible ; chaque controle est bloquant.
 name: CI
 
 on:
@@ -43,9 +43,8 @@ jobs:
         if: ${{ !cancelled() }}
         run: uv run --frozen poe format-check
 
-      - name: Types (mypy, non bloquant)
+      - name: Types (mypy)
         if: ${{ !cancelled() }}
-        continue-on-error: true
         run: uv run --frozen poe mypy
 
       # Tests

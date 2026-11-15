@@ -125,4 +125,4 @@ uv run poe test           # ou une tâche seule : lint, format-check, mypy, secu
 uv run python -m infra.verifier_sources
 ```
 
-Les mêmes contrôles tournent dans la CI GitHub Actions (`.github/workflows/ci.yml`) à chaque pull request et à chaque push sur `main` ; seul mypy n'y bloque pas.
+Les mêmes contrôles tournent dans la CI GitHub Actions (`.github/workflows/ci.yml`) à chaque pull request et à chaque push sur `main` ; chacun y est bloquant.

@@ -49,7 +49,7 @@ from concurrent.futures import FIRST_COMPLETED, Future, ThreadPoolExecutor, wait
 from contextlib import contextmanager
 from datetime import datetime, timezone
 from pathlib import Path
-from typing import Any, Callable, Iterator, TextIO
+from typing import Any, Callable, Iterator, TextIO, cast
 
 from banc.campagnes import campagnes
 
@@ -124,7 +124,7 @@ def verrou_lanceur(fichier: Path) -> Iterator[None]:
 
 def processus_vivant(pid: int) -> bool:
     """Le processus `pid` tourne-t-il sur cette machine ? (Windows : OpenProcess ; jamais os.kill, qui y tue.)"""
-    if os.name == "nt":
+    if sys.platform == "win32":  # equivaut a os.name == "nt" ; forme que mypy comprend (ctypes.windll : Windows seul)
         import ctypes
 
         noyau = ctypes.windll.kernel32
@@ -394,7 +394,10 @@ def envoyer_direct(mesure: str, valeur: float = 1, fournisseur: str | None = Non
         return
     if type_statsd == "ms":
         valeur = round(valeur * 1000, 1)  # duree passee en secondes, envoyee en millisecondes (StatsD)
-    envoyer_jauge(".".join(["banc.direct", mesure, campagne, *(valeurs[e] for e in etiquettes)]), valeur, type_statsd)
+    # chaque etiquette de `etiquettes` a sa valeur fournie (non None) : verifie par le premier ValueError
+    envoyer_jauge(
+        ".".join(["banc.direct", mesure, campagne, *(cast(str, valeurs[e]) for e in etiquettes)]), valeur, type_statsd
+    )
 
 
 def compter_appel(fournisseur: str, etape: str, duree_s: float | None = None, erreur: str | None = None) -> None:

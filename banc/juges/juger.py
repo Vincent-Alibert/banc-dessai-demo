@@ -12,6 +12,7 @@ import time
 from collections import Counter
 from datetime import datetime, timezone
 from pathlib import Path
+from typing import Any, cast
 
 from banc import chemins
 from banc.campagnes.parallele import (
@@ -71,7 +72,7 @@ def valider(notes: dict, ident: str, nullables: tuple[str, ...] = ("B6",)) -> di
     grille v1.3 sur un dialogue court), justification par critere. Leve sinon."""
     if notes.get("id") != ident:
         raise ValueError(f"id attendu {ident}, recu {notes.get('id')!r}")
-    propre = {"id": ident, "justifications": {}}
+    propre: dict[str, Any] = {"id": ident, "justifications": {}}
     just = notes.get("justifications") or {}
     for c in CRITERES:
         v = notes.get(c)
@@ -163,7 +164,7 @@ def dialogue_hors_notation(campagne: str, cle: str) -> tuple[str, str, str]:
 
 def _version_au_moins(version: str, mini: tuple[int, int]) -> bool:
     m = re.search(r"v(\d+)\.(\d+)$", version)
-    return bool(m) and (int(m.group(1)), int(m.group(2))) >= mini
+    return m is not None and (int(m.group(1)), int(m.group(2))) >= mini
 
 
 def avec_fiche(version: str) -> bool:
@@ -392,6 +393,7 @@ def noter_campagne() -> int:
         dossier_j = RUNS / campagne / "juges" / j
         debut = time.perf_counter()
         erreur = None
+        usage: dict
         brut, modele, usage, notes = "", MODELES[j], {}, None
         usage_total = {
             "entree": 0,
@@ -480,12 +482,13 @@ def noter_campagne() -> int:
     reserves: dict[int, float] = {}
     couts_reels: list[float] = []
     faites: set[int] = set()
-    depense_juge: Counter[str] = Counter()
+    depense_juge = cast("dict[str, float]", Counter())  # un Counter a valeurs flottantes (typeshed : int)
     faites_juge: Counter[str] = Counter()
     juge_arrete: list[str] = []  # a 1 worker : juge dont la notation a declenche l'arret (pas de notes)
 
     def controle_sequentiel(rang_fini: int) -> str | None:
         """Le controle que faisait la boucle sequentielle apres la notation `rang_fini`."""
+        assert plafond is not None  # appele seulement si plafond is not None (autoriser et apres executer)
         j = taches[rang_fini][0]
         projection = (
             sum(couts_reels)
@@ -505,10 +508,12 @@ def noter_campagne() -> int:
     def autoriser(rang: int) -> str | None:
         if paralleles == 1:
             return controle_sequentiel(rang - 1) if plafond is not None and rang > 0 else None
+        assert budget is not None  # --paralleles valide de 1 a PARALLELES_MAX : ici > 1, budget cree
         montant, motif = budget.reserver(taches[rang][0])
         if motif:
             print(f"\n[ARRET] {motif}")
             return motif
+        assert montant is not None  # Plafond.reserver rend (montant, None) ou (None, motif)
         reserves[rang] = montant
         return None
 
@@ -518,6 +523,7 @@ def noter_campagne() -> int:
             if budget is not None:
                 budget.liberer(j, reserves.pop(rang), None)
             raise erreur  # hors appel au juge (ecriture de la sortie...) : arret
+        assert resultat is not None  # executer : sans erreur, resultat = noter(tache), un tuple
         notes, cout = resultat
         if budget is not None:
             budget.liberer(j, reserves.pop(rang), cout)

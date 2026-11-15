@@ -183,6 +183,11 @@ def installer(module: ModuleType, dossier: Path, echelle: float) -> set[str]:
         tours = _FIL.source["tours"]
         return tours[n - 1] if n <= len(tours) else None
 
+    def persona_tour_1() -> str:
+        t = tour(1)
+        assert t is not None  # chaque source a de 1 a 5 tours, numerotes depuis 1 (verifie plus haut)
+        return t["persona"]
+
     def inscrire(email: str, mot_de_passe: str, username: str, first_name: str) -> dict:
         verifier_interruption()
         ident, court = email.split(".")[:2]
@@ -200,7 +205,7 @@ def installer(module: ModuleType, dossier: Path, echelle: float) -> set[str]:
         return {"corps_envoye": None, "reponse": {"status": "simule"}, "duree_s": ONBOARDING_S}
 
     def premier_message(texte: str, fiche: FicheBanc, prenom: str | None = None) -> tuple[str, bool]:
-        return tour(1)["persona"], False
+        return persona_tour_1(), False
 
     def jouer_un_tour(
         messages: list[dict],
@@ -217,9 +222,10 @@ def installer(module: ModuleType, dossier: Path, echelle: float) -> set[str]:
                 (t or {}).get("erreur_oracle") or f"simulation : aucun tour {n} dans la source"
             )
         dormir(t.get("noa_duree_s") or 0.0)
-        etat_simulation.CONVERSATION["id"] = f"simule-conv-{_FIL.ident}-{_FIL.bras}"  # propre au worker
+        conversation_id = f"simule-conv-{_FIL.ident}-{_FIL.bras}"
+        etat_simulation.CONVERSATION["id"] = conversation_id  # propre au worker
         if n8n:
-            n8n.mettre_en_attente(etat_simulation.CONVERSATION["id"])  # la route met l'analyse en file a chaque tour
+            n8n.mettre_en_attente(conversation_id)  # la route met l'analyse en file a chaque tour
         return (
             t.get("noa_brut") or t["noa"],
             t.get("noa_duree_s") or 0.0,
@@ -323,7 +329,7 @@ def installer(module: ModuleType, dossier: Path, echelle: float) -> set[str]:
         "onboarder": onboarder,
         "recuperer_contexte_utilisateur": lambda porte: _FIL.source.get("contexte_utilisateur") or {},
         "quetes_actives": lambda user_id, access_token: [],
-        "bouton_accueil": lambda porte: tour(1)["persona"],
+        "bouton_accueil": lambda porte: persona_tour_1(),
         "normaliser": premier_message,
         "jouer_un_tour": jouer_un_tour,
         "repondre": repondre,
@@ -349,5 +355,5 @@ def installer(module: ModuleType, dossier: Path, echelle: float) -> set[str]:
         for nom, valeur in precedents.items():
             setattr(module, nom, valeur)
 
-    module._restaurer_simulation = restaurer
+    setattr(module, "_restaurer_simulation", restaurer)  # module : ModuleType, attribut declare dans dialoguer
     return {run.get("version_persona") or "v1" for _, run in sources.values()}
