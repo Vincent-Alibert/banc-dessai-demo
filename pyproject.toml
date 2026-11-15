@@ -75,9 +75,17 @@ test = "pytest --cov --cov-report=term --cov-report=html --cov-report=xml --juni
 lint = "ruff check ."
 fmt = "ruff format ."
 format-check = "ruff format --check ."
-security = "pip-audit --skip-editable"
 bandit = "bandit -r . -x ./tests,./.venv,./.uv-cache -q --severity-level high"
 mypy = "mypy banc"
+
+[tool.poe.tasks.security]
+help = "pip-audit : environnement dev, puis groupe dbt (livre dans l'image, en conflit avec dev : audite par son export)"
+sequence = [
+    { cmd = "pip-audit --skip-editable" },
+    { cmd = "uv export --frozen --only-group dbt --no-emit-project -o .venv/audit-dbt.txt" },
+    { cmd = "pip-audit -r .venv/audit-dbt.txt --require-hashes --disable-pip --progress-spinner off" },
+]
+ignore_fail = "return_non_zero"
 
 [tool.poe.tasks.check-all]
 help = "Toutes les verifications, sans s'arreter au premier echec ; code non nul si l'une echoue"
