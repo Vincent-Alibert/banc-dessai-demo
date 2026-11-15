@@ -9,3 +9,6 @@ output
 working
 tests/.travail
 *.zip
+# uv : environnement et cache locaux, jamais dans le contexte de construction
+.venv
+.uv-cache

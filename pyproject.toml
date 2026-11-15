@@ -4,10 +4,7 @@
 #   uv sync --frozen                 # le code en mode editable + le groupe dev, versions exactes du verrou
 #   uv run poe check-all             # lint, format, mypy, tests, securite
 # Python ~=3.12.0 : aligne sur l'image Airflow (apache/airflow:3.3.2-python3.12, docker/airflow/Dockerfile).
-# requirements.txt et dbt/requirements.txt restent l'entree de l'image ; ils sont GENERES depuis le verrou :
-#   uv export --frozen --no-emit-project --no-dev --no-hashes -o requirements.txt
-#   uv export --frozen --no-emit-project --only-group dbt --no-hashes -o dbt/requirements.txt
-# et tests/test_pyproject.py echoue s'ils s'en ecartent.
+# Aucun requirements*.txt : l'image Airflow installe aussi depuis ce fichier et uv.lock (docker/airflow/Dockerfile).
 # Installation EDITABLE seulement. Airflow n'est pas une dependance : il vit dans son image. dbt tourne dans un
 # environnement a part (/opt/dbt-venv) : groupe « dbt », jamais installe avec le reste.
 
@@ -38,13 +35,15 @@ dev = [
     "PyYAML==6.0.3",
     "Jinja2==3.1.6",
 ]
-# versions de dbt/requirements.txt (image Airflow, /opt/dbt-venv)
+# dbt dans l'image Airflow (/opt/dbt-venv)
 dbt = [
     "dbt-core==1.11.16",
     "dbt-postgres==1.11.0",
 ]
 
 [tool.uv]
+# uv 0.12.9 impose partout (poste, CI, image) : c'est lui qui a ecrit uv.lock
+required-version = "==0.12.9"
 default-groups = ["dev"]
 # dbt et dev ne s'installent jamais ensemble (pathspec : dbt-core 1.11.16 veut < 0.13, mypy 2.4.1 >= 1.0)
 conflicts = [[{ group = "dev" }, { group = "dbt" }]]
