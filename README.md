@@ -21,36 +21,6 @@ Le banc d'essai a été développé dans un dépôt privé, aux côtés de Noa, 
 
 Le contenu est protégé : **tous droits réservés**. Sans accord écrit des auteurs, il est interdit de le copier, le diffuser, le publier, le modifier pour un autre usage ou l'utiliser à des fins commerciales. Voir `LICENSE`.
 
-## Lancer la démonstration
-
-Prérequis : Docker Desktop, Git, 8 Go de mémoire libre.
-
-```
-docker compose up -d --build
-```
-
-Puis ouvrir Airflow (http://127.0.0.1:18080/dags/banc_chaine) et déclencher le DAG `banc_chaine` (**Trigger DAG** ; par défaut, campagne `S01`). Détails dans les sections 1 à 4 ci-dessous.
-
-| Outil | Adresse |
-| --- | --- |
-| Airflow | http://127.0.0.1:18080 |
-| Metabase | http://127.0.0.1:13030 |
-| Rapports et documentation dbt (lignage) | http://127.0.0.1:18081 |
-
-## Contact
-
-Pour toute question sur ce dépôt : contact@nextlevel4me.com.
-
----
-
-# Noa — banc d'essai de démonstration
-
-Banc d'essai autonome permettant d'exécuter une simulation complète de la chaîne d'évaluation de l'IA conversationnelle **Noa**.
-
-La pile tourne entièrement en local via Docker Compose en mode simulation (doubles enregistrés, juges synthétiques, métriques d'accord, modélisation dbt et tableau de bord Metabase). Aucune clé d'API externe n'est requise.
-
----
-
 ## 1. Démarrer la pile
 
 ### Prérequis
