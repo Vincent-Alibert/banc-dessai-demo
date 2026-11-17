@@ -1,10 +1,25 @@
-# Noa — banc d'essai de démonstration
+# Banc d'essai de Noa : livrable d'examen
 
-Banc d'essai autonome permettant d'exécuter une simulation complète de la chaîne d'évaluation de l'IA conversationnelle **Noa**.
+> **Dépôt réservé à l'évaluation. Ne pas diffuser, ne pas forker, ne pas réutiliser.**
 
-La pile tourne entièrement en local via Docker Compose en mode simulation (doubles enregistrés, juges synthétiques, métriques d'accord, modélisation dbt et tableau de bord Metabase). Aucune clé d'API externe n'est requise.
+Ce dépôt est le livrable du projet final de la certification **Data Engineer de Liora (ex-DataScientest)**, soutenu le 19 novembre 2026 par Thomas Cauhapé et Vincent.
 
----
+## Pourquoi ce dépôt existe
+
+Le banc d'essai a été développé dans un dépôt privé, aux côtés de Noa, une application qui appartient à son auteur et n'est pas diffusée. Ce dépôt en est un **extrait** :
+
+- il contient le banc d'essai (orchestration, entrepôt, tableaux de bord, outils de notation) ;
+- il ne contient **ni le code de Noa, ni ses prompts, ni aucune donnée d'utilisateur réel** ;
+- il est publié **sans l'historique du dépôt d'origine**, pour qu'aucun fichier ni secret de cet historique n'en sorte. Le récit des étapes et la part de chacun sont décrits dans le rapport final.
+
+## Ce que vous pouvez en faire
+
+- le lire et l'exécuter pour évaluer le projet ;
+- lancer la démonstration, qui tourne **sans Noa, sans clé d'API et à 0 $** (juges factices, notes rejouées).
+
+## Ce que vous ne pouvez pas en faire
+
+Le contenu est protégé : **tous droits réservés**. Sans accord écrit des auteurs, il est interdit de le copier, le diffuser, le publier, le modifier pour un autre usage ou l'utiliser à des fins commerciales. Voir `LICENSE`.
 
 ## 1. Démarrer la pile
 
