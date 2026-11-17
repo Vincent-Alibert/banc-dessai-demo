@@ -32,6 +32,7 @@ limites PARTAGEES entre les workers, jamais une par worker.
                   etape ; jamais un persona, un dialogue ni une note de juge.
 Aucun appel a un modele ici : ce module ne fait qu'ordonner, compter et attendre.
 """
+
 from __future__ import annotations
 
 import io
@@ -48,12 +49,12 @@ from concurrent.futures import FIRST_COMPLETED, Future, ThreadPoolExecutor, wait
 from contextlib import contextmanager
 from datetime import datetime, timezone
 from pathlib import Path
-from typing import Any, Callable, Iterator, TextIO
+from typing import Any, Callable, Iterator, TextIO, cast
 
 from banc.campagnes import campagnes
 
 PARALLELES_MAX = 4
-BATTEMENT_JAUGE_S = 15.0       # la jauge des taches en cours est renvoyee au moins toutes les 15 s
+BATTEMENT_JAUGE_S = 15.0  # la jauge des taches en cours est renvoyee au moins toutes les 15 s
 INTERRUPTION = threading.Event()
 
 
@@ -88,11 +89,16 @@ def verrou_lanceur(fichier: Path) -> Iterator[None]:
     machine (conteneur et poste ne voient pas les memes PID) ou illisible : refus, a retirer a la main apres
     avoir verifie qu'aucun lanceur ne tourne."""
     fichier.parent.mkdir(parents=True, exist_ok=True)
-    contenu = json.dumps({"pid": os.getpid(), "machine": socket.gethostname(),
-                          "depuis_utc": datetime.now(timezone.utc).isoformat(timespec="seconds")})
+    contenu = json.dumps(
+        {
+            "pid": os.getpid(),
+            "machine": socket.gethostname(),
+            "depuis_utc": datetime.now(timezone.utc).isoformat(timespec="seconds"),
+        }
+    )
     for _ in range(2):
         try:
-            with open(fichier, "x", encoding="utf-8") as f:       # creation exclusive : deux lanceurs, un gagnant
+            with open(fichier, "x", encoding="utf-8") as f:  # creation exclusive : deux lanceurs, un gagnant
                 f.write(contenu)
             break
         except FileExistsError:
@@ -102,8 +108,10 @@ def verrou_lanceur(fichier: Path) -> Iterator[None]:
             except (OSError, ValueError, KeyError, TypeError):
                 sys.exit(f"[X] verrou {fichier} illisible : verifier qu'aucun lanceur ne tourne, le retirer, relancer.")
             if machine != socket.gethostname() or processus_vivant(pid):
-                sys.exit(f"[X] un lanceur tourne deja sur cette campagne (PID {pid}, machine {machine}, depuis "
-                         f"{autre.get('depuis_utc')}) : rien n'est lance. S'il est arrete, retirer {fichier}.")
+                sys.exit(
+                    f"[X] un lanceur tourne deja sur cette campagne (PID {pid}, machine {machine}, depuis "
+                    f"{autre.get('depuis_utc')}) : rien n'est lance. S'il est arrete, retirer {fichier}."
+                )
             print(f"  verrou perime (PID {pid} arrete) : remplace")
             fichier.unlink(missing_ok=True)
     else:
@@ -116,16 +124,17 @@ def verrou_lanceur(fichier: Path) -> Iterator[None]:
 
 def processus_vivant(pid: int) -> bool:
     """Le processus `pid` tourne-t-il sur cette machine ? (Windows : OpenProcess ; jamais os.kill, qui y tue.)"""
-    if os.name == "nt":
+    if sys.platform == "win32":  # equivaut a os.name == "nt" ; forme que mypy comprend (ctypes.windll : Windows seul)
         import ctypes
+
         noyau = ctypes.windll.kernel32
-        poignee = noyau.OpenProcess(0x1000, False, pid)            # PROCESS_QUERY_LIMITED_INFORMATION
+        poignee = noyau.OpenProcess(0x1000, False, pid)  # PROCESS_QUERY_LIMITED_INFORMATION
         if not poignee:
             return False
         code = ctypes.c_ulong()
         noyau.GetExitCodeProcess(poignee, ctypes.byref(code))
         noyau.CloseHandle(poignee)
-        return code.value == 259                                    # STILL_ACTIVE
+        return code.value == 259  # STILL_ACTIVE
     try:
         os.kill(pid, 0)
     except ProcessLookupError:
@@ -142,8 +151,13 @@ class LimiteDebit:
     (au moins `periode_s` apres le creneau accorde `nombre` rangs plus tot), puis attend ce creneau hors du
     verrou. Deux creneaux sur `nombre` + 1 consecutifs sont donc toujours separes d'au moins `periode_s`."""
 
-    def __init__(self, nombre: int, periode_s: float, horloge: Callable[[], float] = time.monotonic,
-                 dormir: Callable[[float], None] = attendre_interruptible) -> None:
+    def __init__(
+        self,
+        nombre: int,
+        periode_s: float,
+        horloge: Callable[[], float] = time.monotonic,
+        dormir: Callable[[float], None] = attendre_interruptible,
+    ) -> None:
         if nombre < 1 or periode_s <= 0:
             raise ValueError("limite de debit : nombre >= 1 et periode > 0")
         self.nombre, self.periode_s = nombre, periode_s
@@ -161,7 +175,7 @@ class LimiteDebit:
             if len(self._creneaux) >= self.nombre:
                 instant = max(instant, self._creneaux[-self.nombre] + self.periode_s)
             if self._creneaux:
-                instant = max(instant, self._creneaux[-1])       # ordre d'arrivee : jamais avant le precedent
+                instant = max(instant, self._creneaux[-1])  # ordre d'arrivee : jamais avant le precedent
             self._creneaux.append(instant)
         attente = instant - maintenant
         if attente > 0:
@@ -173,9 +187,13 @@ class Pause429:
     """Attente partagee apres un 429 : `signaler` repousse la reprise de tous les workers de base_s, 2 x base_s,
     4 x base_s... (429 consecutifs), au plus plafond_s ; `succes` remet le palier a zero."""
 
-    def __init__(self, base_s: float = 10.0, plafond_s: float = 60.0,
-                 horloge: Callable[[], float] = time.monotonic,
-                 dormir: Callable[[float], None] = attendre_interruptible) -> None:
+    def __init__(
+        self,
+        base_s: float = 10.0,
+        plafond_s: float = 60.0,
+        horloge: Callable[[], float] = time.monotonic,
+        dormir: Callable[[float], None] = attendre_interruptible,
+    ) -> None:
         self.base_s, self.plafond_s = base_s, plafond_s
         self._horloge, self._dormir = horloge, dormir
         self._reprise = 0.0
@@ -216,9 +234,13 @@ class Plafond:
     comptee au montant reserve ; d'une execution a l'autre, c'est au lanceur de le reporter (dialoguer.py :
     fichiers de reservation)."""
 
-    def __init__(self, plafond_usd: float | None, a_faire: Counter[str],
-                 deja: dict[str, tuple[float, int]] | None = None,
-                 estimations: dict[str, float] | None = None) -> None:
+    def __init__(
+        self,
+        plafond_usd: float | None,
+        a_faire: Counter[str],
+        deja: dict[str, tuple[float, int]] | None = None,
+        estimations: dict[str, float] | None = None,
+    ) -> None:
         self.plafond_usd = plafond_usd
         self._restants: Counter[str] = Counter(a_faire)
         self._mesure = {cle: [somme, n] for cle, (somme, n) in (deja or {}).items()}
@@ -235,12 +257,15 @@ class Plafond:
         montant = self.estimation(cle)
         if self.plafond_usd is not None:
             # au millionieme de dollar, la precision des couts du banc : 16 x 0,05 ne depasse pas 0,80
-            projection = round(self.depense + self.reserve
-                               + sum(self.estimation(k) * n for k, n in self._restants.items()), 6)
+            projection = round(
+                self.depense + self.reserve + sum(self.estimation(k) * n for k, n in self._restants.items()), 6
+            )
             if round(self.depense, 6) >= self.plafond_usd or projection > self.plafond_usd:
-                return None, (f"plafond {self.plafond_usd} $ : depense {self.depense:.6f} $, reservations en cours "
-                              f"{self.reserve:.6f} $, projection {projection:.6f} $ pour "
-                              f"{sum(self._restants.values())} tache(s) non demarree(s). Rien d'autre n'est lance.")
+                return None, (
+                    f"plafond {self.plafond_usd} $ : depense {self.depense:.6f} $, reservations en cours "
+                    f"{self.reserve:.6f} $, projection {projection:.6f} $ pour "
+                    f"{sum(self._restants.values())} tache(s) non demarree(s). Rien d'autre n'est lance."
+                )
         self._restants[cle] -= 1
         self.reserve += montant
         return montant, None
@@ -312,19 +337,19 @@ def envoyer_jauge(nom: str, valeur: float, type_statsd: str = "g") -> None:
 # Metriques en direct (rangee « En direct » de Grafana, infra/monitoring/statsd/mapping.yml) : mesure -> (type
 # StatsD, etiquettes apres la campagne). Aucune autre etiquette : ni persona, ni dialogue, ni note de juge, meme agregee.
 METRIQUES_DIRECT: dict[str, tuple[str, tuple[str, ...]]] = {
-    "appels": ("c", ("fournisseur", "etape")),            # un appel vu du lanceur (essai compris)
-    "latence": ("ms", ("fournisseur", "etape")),          # duree d'un appel reussi, passee en secondes
+    "appels": ("c", ("fournisseur", "etape")),  # un appel vu du lanceur (essai compris)
+    "latence": ("ms", ("fournisseur", "etape")),  # duree d'un appel reussi, passee en secondes
     "erreurs_429": ("c", ("fournisseur", "etape")),
     "erreurs_500": ("c", ("fournisseur", "etape")),
-    "erreurs_504": ("c", ("fournisseur", "etape")),       # 504, ou delai depasse cote client
+    "erreurs_504": ("c", ("fournisseur", "etape")),  # 504, ou delai depasse cote client
     "erreurs_autres": ("c", ("fournisseur", "etape")),
-    "reprises": ("c", ("fournisseur", "etape")),          # nouvel essai apres une erreur (429 de Mistral, juge)
-    "cout_usd": ("g", ("etape",)),                        # cumul de la campagne : Noa (dialogues), juges
-    "plafond_usd": ("g", ("etape",)),                     # plafond du lanceur (juges : celui de l'execution)
-    "part_plafond": ("g", ("etape",)),                    # depense comptee par ce plafond / plafond (alerte a 80 %)
-    "dialogues_termines": ("c", ()),                      # run ecrit, quel que soit le statut de fin
-    "dialogues_tronques": ("c", ()),                      # TECHNICAL_ERROR, ou erreur du lanceur sans run
-    "notations": ("c", ("fournisseur",)),                 # notation valide ecrite
+    "reprises": ("c", ("fournisseur", "etape")),  # nouvel essai apres une erreur (429 de Mistral, juge)
+    "cout_usd": ("g", ("etape",)),  # cumul de la campagne : Noa (dialogues), juges
+    "plafond_usd": ("g", ("etape",)),  # plafond du lanceur (juges : celui de l'execution)
+    "part_plafond": ("g", ("etape",)),  # depense comptee par ce plafond / plafond (alerte a 80 %)
+    "dialogues_termines": ("c", ()),  # run ecrit, quel que soit le statut de fin
+    "dialogues_tronques": ("c", ()),  # TECHNICAL_ERROR, ou erreur du lanceur sans run
+    "notations": ("c", ("fournisseur",)),  # notation valide ecrite
 }
 FOURNISSEURS_DIRECT = ("mistral", "nvidia", "google", "openai", "factice")
 ETAPES_DIRECT = ("noa", "onboarding", "persona", "juge", "dialogues", "juges")
@@ -333,7 +358,7 @@ _CAMPAGNE_DIRECT: dict[str, str | None] = {"campagne": None}
 
 def definir_campagne_direct(campagne: str | None) -> None:
     """Campagne des metriques en direct : un lanceur ne traite qu'une campagne (verrou_lanceur)."""
-    if campagne is not None and not campagnes.code_valide(campagne):      # nomenclature : campagnes.py
+    if campagne is not None and not campagnes.code_valide(campagne):  # nomenclature : campagnes.py
         raise ValueError(f"campagne {campagne!r} : {campagnes.FORMATS}, ou un ancien nom (C00 a C15, C90 a C99)")
     _CAMPAGNE_DIRECT["campagne"] = campagne
 
@@ -347,7 +372,7 @@ def code_erreur(texte: str) -> str:
     elif re.search(r"Timeout|timed out|DEADLINE", texte):
         code = "504"
     else:
-        nombre = re.search(r"\b(429|500|504)\b", texte)          # « Mistral API error 429 », erreurs des SDK
+        nombre = re.search(r"\b(429|500|504)\b", texte)  # « Mistral API error 429 », erreurs des SDK
         code = nombre.group(1) if nombre else ""
     return f"erreurs_{code}" if code in ("429", "500", "504") else "erreurs_autres"
 
@@ -361,13 +386,18 @@ def envoyer_direct(mesure: str, valeur: float = 1, fournisseur: str | None = Non
     valeurs = {"fournisseur": fournisseur, "etape": etape}
     if (fournisseur is not None) != ("fournisseur" in etiquettes) or (etape is not None) != ("etape" in etiquettes):
         raise ValueError(f"metrique {mesure} : etiquettes attendues {etiquettes}")
-    if (fournisseur is not None and fournisseur not in FOURNISSEURS_DIRECT) or (etape is not None and etape not in ETAPES_DIRECT):
+    if (fournisseur is not None and fournisseur not in FOURNISSEURS_DIRECT) or (
+        etape is not None and etape not in ETAPES_DIRECT
+    ):
         raise ValueError(f"metrique {mesure} : fournisseur {fournisseur!r} ou etape {etape!r} inconnu")
     if campagne is None:
         return
     if type_statsd == "ms":
-        valeur = round(valeur * 1000, 1)         # duree passee en secondes, envoyee en millisecondes (StatsD)
-    envoyer_jauge(".".join(["banc.direct", mesure, campagne, *(valeurs[e] for e in etiquettes)]), valeur, type_statsd)
+        valeur = round(valeur * 1000, 1)  # duree passee en secondes, envoyee en millisecondes (StatsD)
+    # chaque etiquette de `etiquettes` a sa valeur fournie (non None) : verifie par le premier ValueError
+    envoyer_jauge(
+        ".".join(["banc.direct", mesure, campagne, *(cast(str, valeurs[e]) for e in etiquettes)]), valeur, type_statsd
+    )
 
 
 def compter_appel(fournisseur: str, etape: str, duree_s: float | None = None, erreur: str | None = None) -> None:
@@ -386,10 +416,15 @@ def compter_exception(fournisseur: str, etape: str, erreur: Exception) -> None:
         compter_appel(fournisseur, etape, erreur=f"{type(erreur).__name__} : {erreur}")
 
 
-def executer(taches: list[Any], paralleles: int, faire: Callable[[Any], Any], *,
-             autoriser: Callable[[int], str | None] = lambda rang: None,
-             terminer: Callable[[int, Any, Exception | None], None] = lambda rang, resultat, erreur: None,
-             jauge: str | None = None) -> tuple[list[tuple[int, Any, Exception | None]], str | None]:
+def executer(
+    taches: list[Any],
+    paralleles: int,
+    faire: Callable[[Any], Any],
+    *,
+    autoriser: Callable[[int], str | None] = lambda rang: None,
+    terminer: Callable[[int, Any, Exception | None], None] = lambda rang, resultat, erreur: None,
+    jauge: str | None = None,
+) -> tuple[list[tuple[int, Any, Exception | None]], str | None]:
     """Lance faire(tache) pour chaque tache, dans l'ordre de la liste, au plus `paralleles` a la fois.
 
     Avant chaque demarrage, autoriser(rang) : None pour demarrer, sinon le motif d'arret : plus rien ne
@@ -412,8 +447,11 @@ def executer(taches: list[Any], paralleles: int, faire: Callable[[Any], Any], *,
     INTERRUPTION.clear()
     # SIGTERM (arret d'une tache par Airflow) traite comme Ctrl+C : sans cela, le processus mourrait sans lever le
     # drapeau. Un signal n'est recu que par le fil principal, seul a pouvoir installer le gestionnaire.
-    sigterm_precedent = (signal.signal(signal.SIGTERM, _sigterm_en_interruption)
-                         if threading.current_thread() is threading.main_thread() else None)
+    sigterm_precedent = (
+        signal.signal(signal.SIGTERM, _sigterm_en_interruption)
+        if threading.current_thread() is threading.main_thread()
+        else None
+    )
     try:
         while True:
             while arret is None and suivant < len(taches) and len(en_vol) < paralleles:
@@ -430,11 +468,11 @@ def executer(taches: list[Any], paralleles: int, faire: Callable[[Any], Any], *,
                 rang = en_vol.pop(fut)
                 erreur = fut.exception()
                 if erreur is not None and not isinstance(erreur, Exception):
-                    raise erreur                                 # interruption : rien n'est masque
+                    raise erreur  # interruption : rien n'est masque
                 resultats[rang] = (rang, None if erreur else fut.result(), erreur)
                 terminer(rang, resultats[rang][1], erreur)
     except BaseException:
-        INTERRUPTION.set()          # plus aucun appel payant : l'appel en cours de chaque worker est le dernier
+        INTERRUPTION.set()  # plus aucun appel payant : l'appel en cours de chaque worker est le dernier
         raise
     finally:
         pool.shutdown(wait=True, cancel_futures=True)

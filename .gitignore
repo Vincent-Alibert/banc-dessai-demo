@@ -31,3 +31,14 @@ logs/
 
 # Fichiers temporaires tests
 tests/.travail/
+
+# uv, installation editable et rapports de « poe test » (pyproject.toml)
+*.egg-info/
+.ruff_cache/
+.mypy_cache/
+.pytest_cache/
+.coverage
+coverage.xml
+htmlcov/
+rapport-junit.xml
+.uv-cache/

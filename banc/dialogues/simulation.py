@@ -2,10 +2,10 @@
 Le jeu synthétique C01 alimente inscription, onboarding, tours et file d'analyse en mémoire.
 Les coûts payés sont nuls ; cout.simule_usd conserve le scénario historique pour le budget.
 """
+
 from __future__ import annotations
 
 import json
-import os
 import sys
 import threading
 import time
@@ -24,25 +24,40 @@ from banc.garde import source_autorisee, nombre_positif, PERSONAS
 import hashlib
 
 # Mesures de C03 a C15 (76 dialogues dont la fin est datee ; docs/exploitation/DEMO.md, section 10), en secondes
-PREPARATION_S = 0.7            # mediane (0,65 s) : inscription, cookie, contexte, quetes
-ONBOARDING_S = 8.7             # MOYENNE des 30 dialogues avec onboarding dates (mediane 8,65 s)
-METROLOGIE_S = 0.0             # mediane et p90 : la metrologie est deja ecrite a la fin du dernier tour
-APRES_ANALYSE_S = 2.4          # mediane (2,43 s) : dernier sondage, lecture des couts, ecriture du run
+PREPARATION_S = 0.7  # mediane (0,65 s) : inscription, cookie, contexte, quetes
+ONBOARDING_S = 8.7  # MOYENNE des 30 dialogues avec onboarding dates (mediane 8,65 s)
+METROLOGIE_S = 0.0  # mediane et p90 : la metrologie est deja ecrite a la fin du dernier tour
+APRES_ANALYSE_S = 2.4  # mediane (2,43 s) : dernier sondage, lecture des couts, ecriture du run
 # n8n_banc (n8n/post-analysis.local.json) : toutes les 30 s, claim_next_analysis_job() prend UNE ligne en attente de
 # oracle_analysis_queue, la plus ancienne (created_at) ; la route remet la ligne de la conversation en attente a
 # chaque tour. dialoguer.attendre_analyse attend au plus 75 s.
 CYCLE_N8N_S = 30.0
-TRAITEMENT_N8N_S = 5.0         # appel Mistral et ecriture (post_analysis apparait 1 a 10 s apres la prise)
+TRAITEMENT_N8N_S = 5.0  # appel Mistral et ecriture (post_analysis apparait 1 a 10 s apres la prise)
 DELAI_ANALYSE_S = 75.0
 
-_FIL = threading.local()       # run source du dialogue en cours, propre a chaque worker
+_FIL = threading.local()  # run source du dialogue en cours, propre a chaque worker
 
 # Garde reseau de la simulation : evenements d'audit refuses pendant reseau_interdit()
 EVENEMENTS_INTERDITS = (
-    "socket.__new__", "socket.connect", "socket.connect_ex", "socket.bind", "socket.getaddrinfo",
-    "socket.gethostbyname", "socket.sendto", "socket.sendmsg", "urllib.Request", "http.client.connect",
-    "subprocess.Popen", "os.system", "os.exec", "os.posix_spawn", "os.spawn", "os.startfile",
-    "os.fork", "os.forkpty", "pty.spawn",
+    "socket.__new__",
+    "socket.connect",
+    "socket.connect_ex",
+    "socket.bind",
+    "socket.getaddrinfo",
+    "socket.gethostbyname",
+    "socket.sendto",
+    "socket.sendmsg",
+    "urllib.Request",
+    "http.client.connect",
+    "subprocess.Popen",
+    "os.system",
+    "os.exec",
+    "os.posix_spawn",
+    "os.spawn",
+    "os.startfile",
+    "os.fork",
+    "os.forkpty",
+    "pty.spawn",
 )
 GARDE_RESEAU: dict = {"crochet": False, "active": False, "bloquees": []}
 
@@ -92,7 +107,6 @@ class N8nSimule:
         with self.condition:
             self.condition.notify_all()
         self._fil.join(timeout=2)
-
 
     def mettre_en_attente(self, conversation: str) -> None:
         with self.condition:
@@ -169,6 +183,11 @@ def installer(module: ModuleType, dossier: Path, echelle: float) -> set[str]:
         tours = _FIL.source["tours"]
         return tours[n - 1] if n <= len(tours) else None
 
+    def persona_tour_1() -> str:
+        t = tour(1)
+        assert t is not None  # chaque source a de 1 a 5 tours, numerotes depuis 1 (verifie plus haut)
+        return t["persona"]
+
     def inscrire(email: str, mot_de_passe: str, username: str, first_name: str) -> dict:
         verifier_interruption()
         ident, court = email.split(".")[:2]
@@ -186,26 +205,41 @@ def installer(module: ModuleType, dossier: Path, echelle: float) -> set[str]:
         return {"corps_envoye": None, "reponse": {"status": "simule"}, "duree_s": ONBOARDING_S}
 
     def premier_message(texte: str, fiche: FicheBanc, prenom: str | None = None) -> tuple[str, bool]:
-        return tour(1)["persona"], False
+        return persona_tour_1(), False
 
-    def jouer_un_tour(messages: list[dict], porte: etat_simulation.PorteCookies, n: int, contexte: dict | None = None,
-                      extra: dict | None = None) -> tuple[str, float, dict]:
+    def jouer_un_tour(
+        messages: list[dict],
+        porte: etat_simulation.PorteCookies,
+        n: int,
+        contexte: dict | None = None,
+        extra: dict | None = None,
+    ) -> tuple[str, float, dict]:
         etat_simulation.espacer_appel_noa()
         verifier_interruption()
         t = tour(n)
         if t is None or t.get("noa") is None:
-            raise etat_simulation.RefusStrict((t or {}).get("erreur_oracle") or f"simulation : aucun tour {n} dans la source")
+            raise etat_simulation.RefusStrict(
+                (t or {}).get("erreur_oracle") or f"simulation : aucun tour {n} dans la source"
+            )
         dormir(t.get("noa_duree_s") or 0.0)
-        etat_simulation.CONVERSATION["id"] = f"simule-conv-{_FIL.ident}-{_FIL.bras}"     # propre au worker
+        conversation_id = f"simule-conv-{_FIL.ident}-{_FIL.bras}"
+        etat_simulation.CONVERSATION["id"] = conversation_id  # propre au worker
         if n8n:
-            n8n.mettre_en_attente(etat_simulation.CONVERSATION["id"])      # la route met l'analyse en file a chaque tour
-        return (t.get("noa_brut") or t["noa"], t.get("noa_duree_s") or 0.0,
-                {"X-Oracle-Model": t.get("noa_modele_entete"), "X-Oracle-Tier": t.get("noa_tier"),
-                 "X-Oracle-Remaining": t.get("mana_restante"), "X-Oracle-Safety": t.get("safety")})
+            n8n.mettre_en_attente(conversation_id)  # la route met l'analyse en file a chaque tour
+        return (
+            t.get("noa_brut") or t["noa"],
+            t.get("noa_duree_s") or 0.0,
+            {
+                "X-Oracle-Model": t.get("noa_modele_entete"),
+                "X-Oracle-Tier": t.get("noa_tier"),
+                "X-Oracle-Remaining": t.get("mana_restante"),
+                "X-Oracle-Safety": t.get("safety"),
+            },
+        )
 
     def repondre(fiche: FicheBanc, historique: list[dict], temperature: float = 0.8, version: str = "v1") -> Reponse:
         n = len(historique) // 2 + 1
-        attente = moteur_persona.LIMITE_NVIDIA.attendre()     # la vraie file commune, sans appel
+        attente = moteur_persona.LIMITE_NVIDIA.attendre()  # la vraie file commune, sans appel
         verifier_interruption()
         depart = _FIL.source.get("depart")
         if depart and depart.get("apres_tour") == n - 1:
@@ -217,8 +251,15 @@ def installer(module: ModuleType, dossier: Path, echelle: float) -> set[str]:
         t = tour(n)
         dormir((t or {}).get("persona_duree_s") or 0.0)
         if t is None or t.get("persona") is None:
-            return Reponse("", (t or {}).get("persona_duree_s") or 0.0, None, None, None, attente_debit_s=attente,
-                           refus=(t or {}).get("refus_persona") or "simulation : aucun message enregistre")
+            return Reponse(
+                "",
+                (t or {}).get("persona_duree_s") or 0.0,
+                None,
+                None,
+                None,
+                attente_debit_s=attente,
+                refus=(t or {}).get("refus_persona") or "simulation : aucun message enregistre",
+            )
         r = Reponse(t["persona"], t.get("persona_duree_s") or 0.0, None, None, "stop", attente_debit_s=attente)
         r.decision, r.decision_forme = t.get("persona_decision"), t.get("persona_decision_forme")
         return r
@@ -235,14 +276,24 @@ def installer(module: ModuleType, dossier: Path, echelle: float) -> set[str]:
         dormir(APRES_ANALYSE_S)
         source = _FIL.source.get("cout") or {}
         zero = {"appels": 0, "tokens": 0, "cout_usd": 0}
-        return {"dialogue": dict(zero), "onboarding": dict(zero),
-                "analyse": {**zero, "file_oracle_analysis_queue": _FIL.statut_analyse,
-                            "note": "simulation : aucun workflow externe ; file d’analyse en mémoire"},
-                "detail": [], "non_metres_connus": [],
-                "simule_usd": round(sum((source.get(k) or {}).get("cout_usd") or 0
-                                        for k in ("dialogue", "onboarding", "analyse")), 6),
-                "note": (f"simulation du jeu C01/{_FIL.nom} : aucun appel, aucune dépense ; simule_usd "
-                         "= cout Noa mesure de la source, pour le plafond")}
+        return {
+            "dialogue": dict(zero),
+            "onboarding": dict(zero),
+            "analyse": {
+                **zero,
+                "file_oracle_analysis_queue": _FIL.statut_analyse,
+                "note": "simulation : aucun workflow externe ; file d’analyse en mémoire",
+            },
+            "detail": [],
+            "non_metres_connus": [],
+            "simule_usd": round(
+                sum((source.get(k) or {}).get("cout_usd") or 0 for k in ("dialogue", "onboarding", "analyse")), 6
+            ),
+            "note": (
+                f"simulation du jeu C01/{_FIL.nom} : aucun appel, aucune dépense ; simule_usd "
+                "= cout Noa mesure de la source, pour le plafond"
+            ),
+        }
 
     def enrichir(run):
         source = _FIL.source
@@ -250,39 +301,59 @@ def installer(module: ModuleType, dossier: Path, echelle: float) -> set[str]:
         if source.get("marquage"):
             run["marquage"] = source["marquage"]
         run["provenance"] = {
-            "mode": "simulation", "jeu": "C01", "fichier_source": _FIL.nom,
+            "mode": "simulation",
+            "jeu": "C01",
+            "fichier_source": _FIL.nom,
             "sha256_source": empreintes[_FIL.nom],
             "description": "vrai lanceur avec doubles enregistrés ; aucun appel applicatif ou modèle",
         }
-        run["modele_persona"].update({"raisonnement": "enregistré", "penalites": "non applicables",
-                                       "regles_du_banc": "messages synthétiques enregistrés, aucune génération"})
-        run["cout"]["note"] = ("Dépenses de cette exécution : 0 $. Coût simulé : scénario complet de la source, "
-                                  "non proratisé si moins de tours ; réservé séparément par le lanceur.")
+        run["modele_persona"].update(
+            {
+                "raisonnement": "enregistré",
+                "penalites": "non applicables",
+                "regles_du_banc": "messages synthétiques enregistrés, aucune génération",
+            }
+        )
+        run["cout"]["note"] = (
+            "Dépenses de cette exécution : 0 $. Coût simulé : scénario complet de la source, "
+            "non proratisé si moins de tours ; réservé séparément par le lanceur."
+        )
 
     toutes = module.lire_toutes
     remplacements = {
         # les fiches des seuls personas de la source (les autres n'ont rien a rejouer)
         "lire_toutes": lambda: [f for f in toutes() if any(f.identifiant == i for i, _ in sources)],
         "_enrichir_simulation": enrichir,
-        "inscrire": inscrire, "forger_cookies": lambda session: [], "onboarder": onboarder,
+        "inscrire": inscrire,
+        "forger_cookies": lambda session: [],
+        "onboarder": onboarder,
         "recuperer_contexte_utilisateur": lambda porte: _FIL.source.get("contexte_utilisateur") or {},
-        "quetes_actives": lambda user_id, access_token: [], "bouton_accueil": lambda porte: tour(1)["persona"],
-        "normaliser": premier_message, "jouer_un_tour": jouer_un_tour, "repondre": repondre,
-        "fermer_session": lambda porte, conversation_id: 200, "attendre_metrologie": attendre_metrologie,
-        "attendre_analyse": attendre_analyse, "couts": couts,
+        "quetes_actives": lambda user_id, access_token: [],
+        "bouton_accueil": lambda porte: persona_tour_1(),
+        "normaliser": premier_message,
+        "jouer_un_tour": jouer_un_tour,
+        "repondre": repondre,
+        "fermer_session": lambda porte, conversation_id: 200,
+        "attendre_metrologie": attendre_metrologie,
+        "attendre_analyse": attendre_analyse,
+        "couts": couts,
         "modeles_factures": lambda user_id: [t.get("noa_modele_facture") for t in _FIL.source["tours"] if t.get("noa")],
         "commit_application": lambda: dict((_FIL.source.get("cible") or {}).get("application") or {}),
-        "modeles_non_metres": lambda: {}, "base_ciblee": lambda: "simulation", "BRAS_BANC": "simulation",
+        "modeles_non_metres": lambda: {},
+        "base_ciblee": lambda: "simulation",
+        "BRAS_BANC": "simulation",
     }
     precedents = {nom: getattr(module, nom) for nom in remplacements}
     for nom, valeur in remplacements.items():
         if not hasattr(module, nom):
             raise AttributeError(f"simulation : {module.__name__}.{nom} introuvable")
         setattr(module, nom, valeur)
+
     def restaurer():
         if n8n:
             n8n.fermer()
         for nom, valeur in precedents.items():
             setattr(module, nom, valeur)
-    module._restaurer_simulation = restaurer
+
+    setattr(module, "_restaurer_simulation", restaurer)  # module : ModuleType, attribut declare dans dialoguer
     return {run.get("version_persona") or "v1" for _, run in sources.values()}

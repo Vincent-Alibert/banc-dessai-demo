@@ -37,6 +37,7 @@ Ce module n'importe rien d'autre que la bibliotheque standard : aucun appel rese
 
 Usage :  python -m banc.personas.coherence_depart --source runs/C12 [--source runs/C13 ...]     (lecture seule)
 """
+
 from __future__ import annotations
 
 import json
@@ -59,12 +60,12 @@ def _plat(texte: str) -> str:
 # Formules de depart explicites (texte aplati). « arreter la » seulement en fin de proposition, pour ne
 # pas prendre « arreter la cigarette » pour un depart.
 _DEPART = re.compile(
-    r"ferm\w*\s+(l'?\s*)?app"                         # fermer l'appli, je ferme l'application
-    r"|en\s+rest\w*\s+la\b"                            # on en reste la, qu'on en reste la
-    r"|\bm'?\s*arret\w*\s*(la|ici|pour|[.!,;…]|$)"      # je vais m'arreter (ici, la, pour ce soir)
+    r"ferm\w*\s+(l'?\s*)?app"  # fermer l'appli, je ferme l'application
+    r"|en\s+rest\w*\s+la\b"  # on en reste la, qu'on en reste la
+    r"|\bm'?\s*arret\w*\s*(la|ici|pour|[.!,;…]|$)"  # je vais m'arreter (ici, la, pour ce soir)
     r"|\b(j'?\s*arrete|on\s+arrete|je\s+(prefere\s+)?arreter)\b"
     r"|\barret\w*\s+(la|ici)\s*([.!,;…]|$)"
-    r"|\ba\s*(\+|plus|demain|bientot|la\s+prochaine)\s*([.!,;…]|$|noa\b)"   # pas « il y a plus de »
+    r"|\ba\s*(\+|plus|demain|bientot|la\s+prochaine)\s*([.!,;…]|$|noa\b)"  # pas « il y a plus de »
     r"|\bau\s+revoir\b|\bbonne\s+(soiree|journee|nuit)\b|\bciao\b|\bbye\b"
     r"|\bje\s+(te|vous)\s+laisse\b|\bje\s+vais\s+y\s+aller\b|\bje\s+m'?\s*en\s+vais\b"
     r"|\bje\s+(me\s+)?(deconnecte|retire)\b|\bje\s+pars\b|\bje\s+vais\s+partir\b"
@@ -103,8 +104,8 @@ _AGACEMENT = re.compile(
 
 @dataclass
 class Coherence:
-    categorie: str       # coherent, incoherent ou ambigu
-    raison: str          # pourquoi, en quelques mots (lisible dans le run et dans les controles)
+    categorie: str  # coherent, incoherent ou ambigu
+    raison: str  # pourquoi, en quelques mots (lisible dans le run et dans les controles)
 
     @property
     def coherent(self) -> bool:
@@ -122,9 +123,9 @@ def coherence_depart(decision: str | None, message: str | None, motif: str | Non
     if decision != "QUIT_NEGATIVE":
         return Coherence("coherent", "pas un QUIT_NEGATIVE")
     texte = (message or "").strip()
-    if not texte:                                                               # 1
+    if not texte:  # 1
         return Coherence("coherent", "depart sans message")
-    plat = _plat(texte)                                                         # 2
+    plat = _plat(texte)  # 2
     depart = _trouve(_DEPART, plat)
     question = "?" in plat
     demande = _trouve(_DEMANDE, plat)
@@ -132,23 +133,31 @@ def coherence_depart(decision: str | None, message: str | None, motif: str | Non
     agacement = _trouve(_AGACEMENT, plat)
     a_motif = bool((motif or "").strip())
 
-    def ambigu(raison: str) -> Coherence:                                       # 6
+    def ambigu(raison: str) -> Coherence:  # 6
         if a_motif:
             return Coherence("ambigu", raison)
         return Coherence("incoherent", raison + ", sans motif de depart")
 
-    if depart:                                                                  # 3
+    if depart:  # 3
         if question or demande:
-            return ambigu(f"cloture partielle : formule de depart (« {depart} ») et "
-                          + ("question" if question else f"demande (« {demande} »)"))
+            return ambigu(
+                f"cloture partielle : formule de depart (« {depart} ») et "
+                + ("question" if question else f"demande (« {demande} »)")
+            )
         return Coherence("coherent", f"formule de depart dans le message (« {depart} »)")
-    if not (question or demande or confidence):                                 # 4
-        return Coherence("coherent", "retrait sans question, demande ni confidence"
-                         + (f" (agace : « {agacement} »)" if agacement else ""))
-    poursuite = ("le message pose une question" if question
-                 else f"le message demande quelque chose (« {demande} »)" if demande
-                 else f"le message confie quelque chose (« {confidence} »)")
-    if agacement:                                                               # 5
+    if not (question or demande or confidence):  # 4
+        return Coherence(
+            "coherent",
+            "retrait sans question, demande ni confidence" + (f" (agace : « {agacement} »)" if agacement else ""),
+        )
+    poursuite = (
+        "le message pose une question"
+        if question
+        else f"le message demande quelque chose (« {demande} »)"
+        if demande
+        else f"le message confie quelque chose (« {confidence} »)"
+    )
+    if agacement:  # 5
         return ambigu(f"{poursuite}, mais agace ou refuse (« {agacement} »)")
     return Coherence("incoherent", poursuite)
 
@@ -160,13 +169,20 @@ def controler_depart(run: dict) -> dict | None:
     if d.get("statut") != "QUIT_NEGATIVE":
         return None
     c = coherence_depart("QUIT_NEGATIVE", d.get("message_non_envoye"), d.get("motif"))
-    return {"categorie": c.categorie, "coherent": c.coherent, "raison": c.raison,
-            "apres_tour": d.get("apres_tour"), "forme": d.get("decision_forme"),
-            "relance": bool(d.get("decision_relance")), "decision_brute": d.get("decision_brute"),
-            "motif": d.get("motif"), "message_non_envoye": d.get("message_non_envoye"),
-            "version_regle": VERSION_REGLE,
-            # v2.2 : categorie decidee pendant le dialogue (celle qui a compte), sinon None
-            "categorie_au_dialogue": d.get("categorie")}
+    return {
+        "categorie": c.categorie,
+        "coherent": c.coherent,
+        "raison": c.raison,
+        "apres_tour": d.get("apres_tour"),
+        "forme": d.get("decision_forme"),
+        "relance": bool(d.get("decision_relance")),
+        "decision_brute": d.get("decision_brute"),
+        "motif": d.get("motif"),
+        "message_non_envoye": d.get("message_non_envoye"),
+        "version_regle": VERSION_REGLE,
+        # v2.2 : categorie decidee pendant le dialogue (celle qui a compte), sinon None
+        "categorie_au_dialogue": d.get("categorie"),
+    }
 
 
 def departs_ecartes(run: dict) -> int:
@@ -192,15 +208,19 @@ def main() -> int:
             if c is not None:
                 par_categorie[c["categorie_au_dialogue"] or c["categorie"]].append((f.stem, c))
     print(f"coherence des departs QUIT_NEGATIVE (regle {VERSION_REGLE}, lecture seule)")
-    for categorie, titre in (("coherent", "COHERENTS (comptent comme abandon)"),
-                             ("incoherent", "INCOHERENTS (pas un abandon ; v2.2 : traites comme CONTINUE)")):
+    for categorie, titre in (
+        ("coherent", "COHERENTS (comptent comme abandon)"),
+        ("incoherent", "INCOHERENTS (pas un abandon ; v2.2 : traites comme CONTINUE)"),
+    ):
         print(f"\n{titre} : {len(par_categorie[categorie])}")
         for nom, c in par_categorie[categorie]:
             print(f"  {nom:<48} T{c['apres_tour']} {c['forme'] or '-':<8} {c['raison']}")
     print(f"\nAMBIGUS, A RELIRE (pas un abandon, dialogue arrete) : {len(par_categorie['ambigu'])}")
     for nom, c in par_categorie["ambigu"]:
-        print(f"  {nom} — T{c['apres_tour']} {c['forme'] or '-'} — {c['raison']}\n"
-              f"      message non envoye : {c['message_non_envoye']}\n      motif : {c['motif']}")
+        print(
+            f"  {nom} — T{c['apres_tour']} {c['forme'] or '-'} — {c['raison']}\n"
+            f"      message non envoye : {c['message_non_envoye']}\n      motif : {c['motif']}"
+        )
     return 0
 
 

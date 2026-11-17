@@ -6,6 +6,7 @@ Les cinq fiches fournies sont synthétiques ; aucune génération n'est disponib
 
 Usage : python -m entrepot.verifier_personas --personas claire,mehdi
 """
+
 from __future__ import annotations
 
 import hashlib
@@ -15,7 +16,7 @@ from pathlib import Path
 RACINE = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(RACINE))
 from banc.personas.fiche_banc import DOSSIER_PERSONAS, lire  # noqa: E402
-from banc.garde import campagne_valide, exiger_simulation, personas_valides
+from banc.garde import exiger_simulation, personas_valides  # noqa: E402
 
 
 def main() -> int:
@@ -34,8 +35,7 @@ def main() -> int:
         if fiche.axes.mineur:
             sys.exit(f"[X] {ident} : persona mineur, interdit dans le banc")
         empreinte = hashlib.sha256(fiche.model_dump_json().encode("utf-8")).hexdigest()[:16]
-        print(f"  [ok] {ident:<12} {fiche.fiche.identite.prenom}, {fiche.fiche.identite.age} ans, "
-              f"fiche {empreinte}")
+        print(f"  [ok] {ident:<12} {fiche.fiche.identite.prenom}, {fiche.fiche.identite.age} ans, fiche {empreinte}")
     print(f"{len(demandes)} persona(s) pret(s)")
     return 0
 

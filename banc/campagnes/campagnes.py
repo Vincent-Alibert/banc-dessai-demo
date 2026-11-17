@@ -1,4 +1,5 @@
 """Campagnes de simulation S01, S02… ; tout autre mode est refusé."""
+
 from __future__ import annotations
 
 import re
@@ -37,8 +38,10 @@ def refus_source_scellee(source: Path) -> str | None:
     """None si `source` peut etre rejouee ; sinon le motif : rien ne sort d'une campagne scellee, ni ses dialogues
     ni ses notes. A appeler avant toute lecture de la source."""
     if scellee(source):
-        return (f"source {source} scellee (notation humaine en cours) : ni ses dialogues ni ses notes ne sont lus "
-                "ni rejoues")
+        return (
+            f"source {source} scellee (notation humaine en cours) : ni ses dialogues ni ses notes ne sont lus "
+            "ni rejoues"
+        )
     return None
 
 
@@ -54,7 +57,9 @@ def refus_lancement(code: str, mode: str, runs: Path | None = None) -> str | Non
 
 def fichiers_de_runs(dossier: Path) -> list[Path]:
     """Les runs d'un dossier source de rejeu (demo/C01, runs/S01...) : <code>-*.json, avec un code valide."""
-    return sorted(f for f in dossier.glob("*-*.json") if code_valide(f.name.split("-", 1)[0]) or f.name.startswith("C01-"))
+    return sorted(
+        f for f in dossier.glob("*-*.json") if code_valide(f.name.split("-", 1)[0]) or f.name.startswith("C01-")
+    )
 
 
 if __name__ == "__main__":

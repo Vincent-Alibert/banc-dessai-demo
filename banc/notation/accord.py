@@ -18,16 +18,19 @@ Reference : K. Krippendorff, « Computing Krippendorff's Alpha-Reliability », 2
 
 Usage : python -m banc.notation.accord --demo   (calcule les deux mesures sur des donnees fictives)
 """
+
 from __future__ import annotations
 
 import sys
 from collections import Counter
 from itertools import permutations
+from typing import Any, cast
 
 
-def _coincidences(donnees: dict) -> tuple[dict, Counter, float]:
+def _coincidences(donnees: dict) -> tuple[dict[tuple, float], dict[Any, float], float]:
     """Matrice de coincidences o[(c, k)], marges n_c, total n (Krippendorff 2011, §2)."""
-    o: Counter = Counter()
+    # Des Counter (0 pour une cle absente) a poids flottants ; typeshed type les valeurs d'un Counter en int.
+    o = cast("dict[tuple, float]", Counter())
     for notes in donnees.values():
         valeurs = [v for v in notes.values() if v is not None]
         m = len(valeurs)
@@ -35,13 +38,13 @@ def _coincidences(donnees: dict) -> tuple[dict, Counter, float]:
             continue
         for c, k in permutations(valeurs, 2):
             o[(c, k)] += 1 / (m - 1)
-    marges: Counter = Counter()
+    marges = cast("dict[Any, float]", Counter())
     for (c, _k), poids in o.items():
         marges[c] += poids
     return o, marges, sum(marges.values())
 
 
-def _distance2(c, k, niveau: str, marges: Counter, valeurs: list) -> float:
+def _distance2(c, k, niveau: str, marges: dict[Any, float], valeurs: list) -> float:
     if niveau == "nominal":
         return 0.0 if c == k else 1.0
     if niveau == "intervalle":
@@ -63,8 +66,9 @@ def alpha_krippendorff(donnees: dict, niveau: str = "ordinal") -> float | None:
         return None
     valeurs = sorted(marges)
     d_obs = sum(poids * _distance2(c, k, niveau, marges, valeurs) for (c, k), poids in o.items()) / n
-    d_att = sum(marges[c] * marges[k] * _distance2(c, k, niveau, marges, valeurs)
-                for c in valeurs for k in valeurs) / (n * (n - 1))
+    d_att = sum(marges[c] * marges[k] * _distance2(c, k, niveau, marges, valeurs) for c in valeurs for k in valeurs) / (
+        n * (n - 1)
+    )
     if d_att == 0:
         return None
     return 1 - d_obs / d_att
@@ -83,7 +87,7 @@ def kappa_pondere(a: list, b: list, categories: list, poids: str = "quadratique"
 
     def w(i: int, j: int) -> float:  # poids de DESACCORD, 0 sur la diagonale
         d = abs(i - j) / (q - 1)
-        return d ** 2 if poids == "quadratique" else d
+        return d**2 if poids == "quadratique" else d
 
     n = len(a)
     obs = Counter((idx[x], idx[y]) for x, y in zip(a, b))
@@ -99,6 +103,7 @@ def kappa_pondere(a: list, b: list, categories: list, poids: str = "quadratique"
 def _demo() -> None:
     # Deux juges fictifs sur 6 runs x 5 axes, notes 1 a 4, un desaccord d'un cran par run.
     import random
+
     rnd = random.Random(20261011)
     donnees, a, b = {}, [], []
     for run in range(1, 7):

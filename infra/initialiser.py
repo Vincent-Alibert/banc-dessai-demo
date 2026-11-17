@@ -1,4 +1,5 @@
 """Initialisation rejouable des volumes de démo puis migration, sans modifier le dossier de code."""
+
 from pathlib import Path
 import os
 import sys
@@ -18,6 +19,7 @@ def main():
     os.setgid(0)
     os.setuid(50000)
     from entrepot.migrer import main as migrer
+
     return migrer()
 
 

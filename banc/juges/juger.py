@@ -1,6 +1,7 @@
 """Notation déterministe : les deux juges factices du banc, sans API ni clé.
 Les notes démontrent les calculs, pas la qualité de Noa.
 """
+
 from __future__ import annotations
 
 import hashlib
@@ -11,10 +12,21 @@ import time
 from collections import Counter
 from datetime import datetime, timezone
 from pathlib import Path
+from typing import Any, cast
 
 from banc import chemins
-from banc.campagnes.parallele import (PARALLELES_MAX, Plafond, attendre_interruptible, compter_appel, definir_campagne_direct,
-                       envoyer_direct, envoyer_jauge, executer, verifier_interruption, verrou_lanceur)
+from banc.campagnes.parallele import (
+    PARALLELES_MAX,
+    Plafond,
+    attendre_interruptible,
+    compter_appel,
+    definir_campagne_direct,
+    envoyer_direct,
+    envoyer_jauge,
+    executer,
+    verifier_interruption,
+    verrou_lanceur,
+)
 
 from banc.garde import campagne_valide, exiger_simulation
 from banc.dialogues.simulation import reseau_interdit
@@ -60,7 +72,7 @@ def valider(notes: dict, ident: str, nullables: tuple[str, ...] = ("B6",)) -> di
     grille v1.3 sur un dialogue court), justification par critere. Leve sinon."""
     if notes.get("id") != ident:
         raise ValueError(f"id attendu {ident}, recu {notes.get('id')!r}")
-    propre = {"id": ident, "justifications": {}}
+    propre: dict[str, Any] = {"id": ident, "justifications": {}}
     just = notes.get("justifications") or {}
     for c in CRITERES:
         v = notes.get(c)
@@ -85,8 +97,11 @@ def appel_factice(systeme: str, dialogue: str) -> tuple[str, str, dict]:
     """Reponse fixe, au contrat de sortie de la grille : notes constantes, justification
     qui le dit. Aucun appel reseau. Sert a tester la chaine de bout en bout sans cle."""
     ident = json.loads(dialogue).get("id")
-    notes = {"id": ident, **NOTES_FACTICES,
-             "justifications": {c: "juge factice : note fixe, aucun jugement" for c in CRITERES}}
+    notes = {
+        "id": ident,
+        **NOTES_FACTICES,
+        "justifications": {c: "juge factice : note fixe, aucun jugement" for c in CRITERES},
+    }
     return json.dumps(notes, ensure_ascii=False), "factice-v1", {"entree": 0, "sortie": 0}
 
 
@@ -102,8 +117,9 @@ def appel_factice_b(systeme: str, dialogue: str) -> tuple[str, str, dict]:
         base = NOTES_FACTICES.get(c)
         decalage = (-1, 0, 1)[(empreinte >> (2 * rang)) % 3]
         notes[c] = None if base is None else min(4, max(1, base + decalage))
-    notes["justifications"] = {c: "juge factice-b : note du factice decalee de facon deterministe, aucun jugement"
-                               for c in CRITERES}
+    notes["justifications"] = {
+        c: "juge factice-b : note du factice decalee de facon deterministe, aucun jugement" for c in CRITERES
+    }
     return json.dumps(notes, ensure_ascii=False), "factice-b-v1", {"entree": 0, "sortie": 0}
 
 
@@ -133,8 +149,11 @@ def dialogue_hors_notation(campagne: str, cle: str) -> tuple[str, str, str]:
     if not runs:
         sys.exit(f"[X] aucun run {campagne}-*-{cle}.json")
     run = json.loads(runs[-1].read_text(encoding="utf-8"))
-    tours = [{"n": t["n"], "utilisateur": t["persona"], "noa": t.get("noa") if t.get("noa") is not None else ""}
-             for t in run["tours"] if t.get("persona") is not None]
+    tours = [
+        {"n": t["n"], "utilisateur": t["persona"], "noa": t.get("noa") if t.get("noa") is not None else ""}
+        for t in run["tours"]
+        if t.get("persona") is not None
+    ]
     ident = f"HN-{cle}"
     texte = json.dumps({"id": ident, "tours": tours}, ensure_ascii=False, indent=2)
     dossier = RUNS / campagne / "notation" / "hors_notation"
@@ -145,7 +164,7 @@ def dialogue_hors_notation(campagne: str, cle: str) -> tuple[str, str, str]:
 
 def _version_au_moins(version: str, mini: tuple[int, int]) -> bool:
     m = re.search(r"v(\d+)\.(\d+)$", version)
-    return bool(m) and (int(m.group(1)), int(m.group(2))) >= mini
+    return m is not None and (int(m.group(1)), int(m.group(2))) >= mini
 
 
 def avec_fiche(version: str) -> bool:
@@ -174,8 +193,10 @@ def ajouter_fiche(campagne: str, fichier_run: str | None, texte: str) -> str:
         sys.exit("[X] grille avec fiche : fichier du run inconnu pour un dialogue (correspondance.json)")
     persona = json.loads((RUNS / campagne / fichier_run).read_text(encoding="utf-8"))["persona"]
     d = json.loads(texte)
-    fiche = {"cas_sensible": persona.get("cas_sensible") or "aucun",
-             "ne_dira_pas_sans_confiance": persona.get("ne_dira_pas_sans_confiance") or []}
+    fiche = {
+        "cas_sensible": persona.get("cas_sensible") or "aucun",
+        "ne_dira_pas_sans_confiance": persona.get("ne_dira_pas_sans_confiance") or [],
+    }
     # un test a entree fixe garde son contexte fixe (exporter_notation.py) ; un dialogue n'en a pas
     contexte = {"contexte": d["contexte"]} if d.get("contexte") else {}
     return json.dumps({"id": d["id"], "fiche": fiche, **contexte, "tours": d["tours"]}, ensure_ascii=False, indent=2)
@@ -229,29 +250,39 @@ def noter_campagne() -> int:
     args = sys.argv[1:]
     if "--grille" in args:
         # noter dans une grille archivee (ex. docs/evaluation/grilles/PROMPT-JUGE-v1.1.md) sans toucher a la courante
-        i = args.index("--grille"); PROMPT_FICHIER = Path(args[i + 1]).resolve(); del args[i:i + 2]
+        i = args.index("--grille")
+        PROMPT_FICHIER = Path(args[i + 1]).resolve()
+        del args[i : i + 2]
     cout_estime = {}
     if "--cout-estime" in args:
         # cout par dialogue a utiliser quand la campagne n'a encore rien paye dans cette grille
         i = args.index("--cout-estime")
         cout_estime = {k: float(v) for k, v in (x.split("=") for x in args[i + 1].split(","))}
-        del args[i:i + 2]
+        del args[i : i + 2]
     if "--campagne" not in args:
         sys.exit("[X] --campagne CXX obligatoire")
     campagne = args[args.index("--campagne") + 1]
-    del args[args.index("--campagne"):args.index("--campagne") + 2]
+    del args[args.index("--campagne") : args.index("--campagne") + 2]
     juges = list(JUGES)
     if "--juges" in args:
-        i = args.index("--juges"); juges = args[i + 1].split(","); del args[i:i + 2]
+        i = args.index("--juges")
+        juges = args[i + 1].split(",")
+        del args[i : i + 2]
     passage = 1
     if "--passage" in args:
-        i = args.index("--passage"); passage = int(args[i + 1]); del args[i:i + 2]
+        i = args.index("--passage")
+        passage = int(args[i + 1])
+        del args[i : i + 2]
     plafond = None
     if "--plafond" in args:
-        i = args.index("--plafond"); plafond = float(args[i + 1]); del args[i:i + 2]
+        i = args.index("--plafond")
+        plafond = float(args[i + 1])
+        del args[i : i + 2]
     hors_notation = []
     while "--hors-notation" in args:
-        i = args.index("--hors-notation"); hors_notation.append(args[i + 1]); del args[i:i + 2]
+        i = args.index("--hors-notation")
+        hors_notation.append(args[i + 1])
+        del args[i : i + 2]
     refaire = "--refaire" in args
     if refaire:
         args.remove("--refaire")
@@ -260,7 +291,9 @@ def noter_campagne() -> int:
         args.remove("--dry-run")
     paralleles = 1
     if "--paralleles" in args:
-        i = args.index("--paralleles"); paralleles = int(args[i + 1]); del args[i:i + 2]
+        i = args.index("--paralleles")
+        paralleles = int(args[i + 1])
+        del args[i : i + 2]
     if not 1 <= paralleles <= PARALLELES_MAX:
         sys.exit(f"[X] --paralleles : de 1 a {PARALLELES_MAX}")
     if any(a.startswith("--") for a in args):
@@ -272,11 +305,13 @@ def noter_campagne() -> int:
 
     dossier = RUNS / campagne / "notation" / "dialogues"
     fichier_corr = RUNS / campagne / "notation" / "correspondance.json"
-    correspondance = (json.loads(fichier_corr.read_text(encoding="utf-8"))["dialogues"]
-                      if fichier_corr.exists() else {})
+    correspondance = json.loads(fichier_corr.read_text(encoding="utf-8"))["dialogues"] if fichier_corr.exists() else {}
     # (identifiant, fichier du run, texte envoye) : les dialogues notes, puis ceux hors notation demandes
-    a_noter = [(p.stem, correspondance.get(p.stem, {}).get("fichier"), p.read_text(encoding="utf-8"))
-               for p in sorted(dossier.glob("N*.json")) if not voulus or p.stem in voulus]
+    a_noter = [
+        (p.stem, correspondance.get(p.stem, {}).get("fichier"), p.read_text(encoding="utf-8"))
+        for p in sorted(dossier.glob("N*.json"))
+        if not voulus or p.stem in voulus
+    ]
     a_noter += [dialogue_hors_notation(campagne, cle) for cle in hors_notation]
     if not a_noter:
         sys.exit(f"[X] aucun dialogue dans {dossier} (python -m banc.juges.exporter_notation --campagne {campagne})")
@@ -288,8 +323,9 @@ def noter_campagne() -> int:
         ecartes = [ident for ident, fr, _ in a_noter if fr in exemples]
         if ecartes:
             print(f"Exemples de la consigne, non notes en {version} : {ecartes}")
-        a_noter = [(ident, fr, ajouter_fiche(campagne, fr, texte))
-                   for ident, fr, texte in a_noter if fr not in exemples]
+        a_noter = [
+            (ident, fr, ajouter_fiche(campagne, fr, texte)) for ident, fr, texte in a_noter if fr not in exemples
+        ]
         if not a_noter:
             sys.exit("[X] il ne reste aucun dialogue a noter hors exemples de la consigne")
 
@@ -299,7 +335,6 @@ def noter_campagne() -> int:
         print("\n--- premier dialogue envoye tel quel ---\n" + a_noter[0][2][:1500])
         return 0
 
-
     def nom_sortie(ident: str) -> str:
         return f"{ident}{suffixe}.json" if passage == 1 else f"{ident}{suffixe}-p{passage}.json"
 
@@ -308,24 +343,30 @@ def noter_campagne() -> int:
         if refaire or not f.exists():
             return None
         ancien = json.loads(f.read_text(encoding="utf-8"))
-        ok = ancien.get("notes") and ancien.get("fichier_run") == fichier_run and ancien.get("version_prompt") == version
+        ok = (
+            ancien.get("notes") and ancien.get("fichier_run") == fichier_run and ancien.get("version_prompt") == version
+        )
         return ancien["notes"] if ok else None
 
     # Estimation avant tout appel : cout moyen deja paye par dialogue, par juge, x dialogues a faire
     restants = {j: sum(1 for ident, fr, _ in a_noter if not deja_note(j, ident, fr)) for j in juges}
     estimations = {}
-    par_dialogue = {}      # estimation d'une notation, reservee avant son demarrage (plafond par reservation)
+    par_dialogue = {}  # estimation d'une notation, reservee avant son demarrage (plafond par reservation)
     for j in juges:
         moyen = cout_moyen_passe(campagne, j, version) or cout_estime.get(j)
         estimations[j] = None if j.startswith("factice") else (round(moyen * restants[j] * 1.1, 4) if moyen else None)
         par_dialogue[j] = 0.0 if j.startswith("factice") or not moyen else moyen * 1.1
     print(f"Grille {version} · passage {passage} · {len(a_noter)} dialogue(s) · a faire : {restants}")
-    print(f"Estimation (cout moyen deja mesure + 10 %) : {estimations}" + (f" · plafond {plafond} $" if plafond else ""))
+    print(
+        f"Estimation (cout moyen deja mesure + 10 %) : {estimations}" + (f" · plafond {plafond} $" if plafond else "")
+    )
     if plafond is not None:
         if any(e is None for j, e in estimations.items() if not j.startswith("factice") and restants[j]):
             sys.exit("[X] plafond demande mais cout moyen inconnu pour un juge : rien n'est lance.")
         if sum(e or 0 for e in estimations.values()) > plafond:
-            sys.exit(f"[X] estimation {sum(e or 0 for e in estimations.values()):.4f} $ au-dessus du plafond : rien n'est lance.")
+            sys.exit(
+                f"[X] estimation {sum(e or 0 for e in estimations.values()):.4f} $ au-dessus du plafond : rien n'est lance."
+            )
 
     # Notations a faire, juge par juge puis dialogue par dialogue ; celles deja faites dans cette
     # grille et ce passage ne sont pas refaites (pas de double facturation).
@@ -340,8 +381,10 @@ def noter_campagne() -> int:
                 notes_par_juge[j][k] = ancien
             else:
                 taches.append((j, k))
-    print(f"\n{'=' * 72}\nJUGES {', '.join(f'{j} ({MODELES[j]})' for j in juges)} — {version} — "
-          f"{len(taches)} notation(s), {paralleles} en parallele\n{'=' * 72}")
+    print(
+        f"\n{'=' * 72}\nJUGES {', '.join(f'{j} ({MODELES[j]})' for j in juges)} — {version} — "
+        f"{len(taches)} notation(s), {paralleles} en parallele\n{'=' * 72}"
+    )
 
     def noter(tache: tuple[str, int]) -> tuple[dict | None, float | None]:
         """Une notation : deux essais au plus, chaque essai en echec au journal (ajout seul), sortie ecrite."""
@@ -350,13 +393,20 @@ def noter_campagne() -> int:
         dossier_j = RUNS / campagne / "juges" / j
         debut = time.perf_counter()
         erreur = None
+        usage: dict
         brut, modele, usage, notes = "", MODELES[j], {}, None
-        usage_total = {"entree": 0, "sortie": 0, "reflexion": 0, "en_cache": 0, "ecriture_cache": 0,
-                       "essais_factures": 0}
+        usage_total = {
+            "entree": 0,
+            "sortie": 0,
+            "reflexion": 0,
+            "en_cache": 0,
+            "ecriture_cache": 0,
+            "essais_factures": 0,
+        }
         echecs = []  # chaque essai en echec, delai depasse compris, garde dans la sortie
         fournisseur = FOURNISSEUR_JUGE[j]
         for essai in range(1, 3):
-            verifier_interruption()      # lanceur interrompu : aucun nouvel essai
+            verifier_interruption()  # lanceur interrompu : aucun nouvel essai
             if essai > 1:
                 envoyer_direct("reprises", fournisseur=fournisseur, etape="juge")
             debut_essai = time.perf_counter()
@@ -374,7 +424,7 @@ def noter_campagne() -> int:
             except Exception as e:  # noqa: BLE001 — on consigne, on ne plante pas la serie
                 erreur = f"essai {essai} : {type(e).__name__} : {str(e)[:300]}"
                 delai = any(m in f"{type(e).__name__} {e}" for m in ("Timeout", "timed out", "DEADLINE", "504"))
-                if repondu:              # reponse recue mais rejetee (JSON ou notes invalides) : erreur « autre »
+                if repondu:  # reponse recue mais rejetee (JSON ou notes invalides) : erreur « autre »
                     envoyer_direct("erreurs_autres", fournisseur=fournisseur, etape="juge")
                 else:
                     compter_appel(fournisseur, "juge", erreur=f"{type(e).__name__} {e}")
@@ -384,19 +434,44 @@ def noter_campagne() -> int:
         duree = round(time.perf_counter() - debut, 1)
         if usage.get("niveau_reflexion"):
             usage_total["niveau_reflexion"] = usage["niveau_reflexion"]
-        cout = cout_usd(MODELES[j], usage_total) if usage_total["essais_factures"] else (0.0 if j.startswith("factice") else None)
-        (dossier_j / nom_sortie(ident)).write_text(json.dumps({
-            "id": ident, "fichier_run": fichier_run, "hors_notation": ident.startswith("HN-"),
-            "juge": j, "modele": modele, "modele_demande": MODELES[j],
-            "version_prompt": version, "passage": passage, "horodatage_utc": datetime.now(timezone.utc).isoformat(timespec="seconds"),
-            "duree_s": duree, "usage": usage_total, "cout_usd": cout, "notes": notes, "erreur": erreur if notes is None else None, "echecs_essais": echecs,
-            "reponse_brute": brut,
-        }, ensure_ascii=False, indent=2), encoding="utf-8")
+        cout = (
+            cout_usd(MODELES[j], usage_total)
+            if usage_total["essais_factures"]
+            else (0.0 if j.startswith("factice") else None)
+        )
+        (dossier_j / nom_sortie(ident)).write_text(
+            json.dumps(
+                {
+                    "id": ident,
+                    "fichier_run": fichier_run,
+                    "hors_notation": ident.startswith("HN-"),
+                    "juge": j,
+                    "modele": modele,
+                    "modele_demande": MODELES[j],
+                    "version_prompt": version,
+                    "passage": passage,
+                    "horodatage_utc": datetime.now(timezone.utc).isoformat(timespec="seconds"),
+                    "duree_s": duree,
+                    "usage": usage_total,
+                    "cout_usd": cout,
+                    "notes": notes,
+                    "erreur": erreur if notes is None else None,
+                    "echecs_essais": echecs,
+                    "reponse_brute": brut,
+                },
+                ensure_ascii=False,
+                indent=2,
+            ),
+            encoding="utf-8",
+        )
         if notes:
-            envoyer_direct("notations", fournisseur=fournisseur)       # le nombre seulement, jamais une note
-            print(f"  {j} {ident}  " + "  ".join(f"{c}={notes[c] if notes[c] is not None else '–'}" for c in CRITERES)
-                  + f"  ({duree} s, entree {usage_total['entree']}, sortie {usage_total['sortie']}, "
-                    f"reflexion {usage_total['reflexion']}, {cout if cout is not None else '?'} $)")
+            envoyer_direct("notations", fournisseur=fournisseur)  # le nombre seulement, jamais une note
+            print(
+                f"  {j} {ident}  "
+                + "  ".join(f"{c}={notes[c] if notes[c] is not None else '–'}" for c in CRITERES)
+                + f"  ({duree} s, entree {usage_total['entree']}, sortie {usage_total['sortie']}, "
+                f"reflexion {usage_total['reflexion']}, {cout if cout is not None else '?'} $)"
+            )
         else:
             print(f"  {j} {ident}  ECHEC : {erreur}")
         return notes, cout
@@ -407,19 +482,25 @@ def noter_campagne() -> int:
     reserves: dict[int, float] = {}
     couts_reels: list[float] = []
     faites: set[int] = set()
-    depense_juge: Counter[str] = Counter()
+    depense_juge = cast("dict[str, float]", Counter())  # un Counter a valeurs flottantes (typeshed : int)
     faites_juge: Counter[str] = Counter()
-    juge_arrete: list[str] = []          # a 1 worker : juge dont la notation a declenche l'arret (pas de notes)
+    juge_arrete: list[str] = []  # a 1 worker : juge dont la notation a declenche l'arret (pas de notes)
 
     def controle_sequentiel(rang_fini: int) -> str | None:
         """Le controle que faisait la boucle sequentielle apres la notation `rang_fini`."""
+        assert plafond is not None  # appele seulement si plafond is not None (autoriser et apres executer)
         j = taches[rang_fini][0]
-        projection = (sum(couts_reels) + depense_juge[j] / faites_juge[j] * (restants[j] - faites_juge[j])
-                      + sum(estimations[k] or 0 for k in juges[juges.index(j) + 1:]))
+        projection = (
+            sum(couts_reels)
+            + depense_juge[j] / faites_juge[j] * (restants[j] - faites_juge[j])
+            + sum(estimations[k] or 0 for k in juges[juges.index(j) + 1 :])
+        )
         if sum(couts_reels) > plafond or projection > plafond:
             juge_arrete.append(j)
-            motif = (f"plafond {plafond} $ : depense {sum(couts_reels):.4f} $, projection {projection:.4f} $. "
-                     "Rien d'autre n'est lance.")
+            motif = (
+                f"plafond {plafond} $ : depense {sum(couts_reels):.4f} $, projection {projection:.4f} $. "
+                "Rien d'autre n'est lance."
+            )
             print(f"\n[ARRET] {motif}")
             return motif
         return None
@@ -427,10 +508,12 @@ def noter_campagne() -> int:
     def autoriser(rang: int) -> str | None:
         if paralleles == 1:
             return controle_sequentiel(rang - 1) if plafond is not None and rang > 0 else None
+        assert budget is not None  # --paralleles valide de 1 a PARALLELES_MAX : ici > 1, budget cree
         montant, motif = budget.reserver(taches[rang][0])
         if motif:
             print(f"\n[ARRET] {motif}")
             return motif
+        assert montant is not None  # Plafond.reserver rend (montant, None) ou (None, motif)
         reserves[rang] = montant
         return None
 
@@ -439,7 +522,8 @@ def noter_campagne() -> int:
         if erreur is not None:
             if budget is not None:
                 budget.liberer(j, reserves.pop(rang), None)
-            raise erreur                 # hors appel au juge (ecriture de la sortie...) : arret
+            raise erreur  # hors appel au juge (ecriture de la sortie...) : arret
+        assert resultat is not None  # executer : sans erreur, resultat = noter(tache), un tuple
         notes, cout = resultat
         if budget is not None:
             budget.liberer(j, reserves.pop(rang), cout)
@@ -463,30 +547,44 @@ def noter_campagne() -> int:
     definir_campagne_direct(campagne)
     envoyer_cout()
     debut_juges = time.monotonic()
-    _, arret = executer(taches, paralleles, noter, autoriser=autoriser, terminer=terminer,
-                        jauge=f"banc.en_cours.juges.{campagne}")
+    _, arret = executer(
+        taches, paralleles, noter, autoriser=autoriser, terminer=terminer, jauge=f"banc.en_cours.juges.{campagne}"
+    )
     if paralleles == 1 and plafond is not None and arret is None and taches:
-        arret = controle_sequentiel(len(taches) - 1)       # la derniere notation est controlee aussi
-    if faites:                           # rien n'a tourne : la duree d'une vraie execution n'est pas ecrasee
+        arret = controle_sequentiel(len(taches) - 1)  # la derniere notation est controlee aussi
+    if faites:  # rien n'a tourne : la duree d'une vraie execution n'est pas ecrasee
         envoyer_jauge(f"banc.duree_etape.juges.{campagne}.{paralleles}", round(time.monotonic() - debut_juges, 1))
     depense = sum(couts_reels)
 
     for j in juges:
         if j in juge_arrete or any(jj == j and rang not in faites for rang, (jj, _) in enumerate(taches)):
-            continue                     # juge non termine ou arrete au plafond : pas de fichier de notes
+            continue  # juge non termine ou arrete au plafond : pas de fichier de notes
         notes_j = [n for n in notes_par_juge[j] if n]
         nom_notes = f"notes_{j}{suffixe}.json" if passage == 1 else f"notes_{j}{suffixe}_p{passage}.json"
         (RUNS / campagne / "juges" / nom_notes).write_text(
-            json.dumps({"juge": j, "modele": MODELES[j], "campagne": campagne, "version_prompt": version,
-                        "notes": notes_j}, ensure_ascii=False, indent=2), encoding="utf-8")
-        print(f"  -> {j} : {len(notes_j)}/{len(a_noter)} notes ({version}, passage {passage}) dans runs/{campagne}/juges/")
+            json.dumps(
+                {"juge": j, "modele": MODELES[j], "campagne": campagne, "version_prompt": version, "notes": notes_j},
+                ensure_ascii=False,
+                indent=2,
+            ),
+            encoding="utf-8",
+        )
+        print(
+            f"  -> {j} : {len(notes_j)}/{len(a_noter)} notes ({version}, passage {passage}) dans runs/{campagne}/juges/"
+        )
         # effectifs par axe (grille v1.3 : B4 et B5 ne sont plus notes partout) : nombre de notes / sans objet
-        print("     effectifs : " + "  ".join(
-            f"{c} {sum(1 for n in notes_j if n.get(c) is not None)}/{sum(1 for n in notes_j if n.get(c) is None)}"
-            for c in CRITERES) + "  (notes / sans objet)")
+        print(
+            "     effectifs : "
+            + "  ".join(
+                f"{c} {sum(1 for n in notes_j if n.get(c) is not None)}/{sum(1 for n in notes_j if n.get(c) is None)}"
+                for c in CRITERES
+            )
+            + "  (notes / sans objet)"
+        )
     print(f"\nCout total de cette execution : {depense:.6f} $" + (f" (plafond {plafond} $)" if plafond else ""))
     invalides = any(n is None for notes in notes_par_juge.values() for n in notes)
     return 1 if arret or invalides else 0
+
 
 if __name__ == "__main__":
     sys.exit(main())

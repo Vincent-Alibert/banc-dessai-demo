@@ -85,6 +85,8 @@ Une fois le DAG exécuté avec succès, les résultats sont accessibles sur les 
 - Email : `demo@banc.local`
 - Mot de passe : `demo-banc-noa-2026`
 
+Mots de passe de démonstration, locaux uniquement : tous ceux qui figurent dans ce dépôt (README, `docker-compose.yml`, code et tests) ne protègent que cette pile locale et ne doivent jamais servir ailleurs.
+
 Le tableau de bord Metabase créé par la tâche `metabase` affiche l'état d'exécution, la distribution des notes factices par axe d'évaluation, les incidents du scénario, ainsi que les mesures d'accord entre juges (alpha de Krippendorff et kappa quadratique).
 
 ---
@@ -129,9 +131,13 @@ Lors du déclenchement manuel dans Airflow, vous pouvez personnaliser les param�
 
 ## 7. Tests unitaires locaux (hors Docker)
 
-Les tests statiques et unitaires peuvent être exécutés directement avec Python 3.11+ :
+Les tests statiques et unitaires s'exécutent avec Python 3.12 et [uv](https://docs.astral.sh/uv/) 0.12.9, la version qui a écrit `uv.lock` (`pyproject.toml` l'impose) :
 
 ```sh
-python3 -m unittest discover -s tests -v
-python3 -m infra.verifier_sources
+uv sync --frozen          # environnement .venv, versions exactes de uv.lock
+uv run poe check-all      # lint, format, mypy, tests avec couverture, pip-audit, bandit
+uv run poe test           # ou une tâche seule : lint, format-check, mypy, security, bandit
+uv run python -m infra.verifier_sources
 ```
+
+Les mêmes contrôles tournent dans la CI GitHub Actions (`.github/workflows/ci.yml`) à chaque pull request et à chaque push sur `main` ; chacun y est bloquant.
